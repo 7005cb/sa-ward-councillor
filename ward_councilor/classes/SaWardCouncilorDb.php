@@ -8,11 +8,35 @@ class SaWardCouncilorDb extends BxDolModuleDb
         parent::__construct($oConfig);
     }
 
-    function getSpaces($iCatId = 10)
+    function getSpaces($iCatId = null)
     {
+        if ($iCatId !== null && $iCatId > 0) {
+            return $this->getAll(
+                "SELECT `id`, `space_name` AS `title` FROM `bx_spaces_data` WHERE `space_cat` = ? AND `status` = 'active' AND `status_admin` = 'active' ORDER BY `space_name` ASC",
+                [$iCatId]
+            );
+        }
         return $this->getAll(
-            "SELECT `id`, `space_name` AS `title` FROM `bx_spaces_data` WHERE `space_cat` = ? AND `status` = 'active' AND `status_admin` = 'active' ORDER BY `space_name` ASC",
-            [$iCatId]
+            "SELECT `id`, `space_name` AS `title` FROM `bx_spaces_data` WHERE `status` = 'active' AND `status_admin` = 'active' ORDER BY `space_name` ASC"
+        );
+    }
+
+    function getSpacesByCategory($iCatId = 0)
+    {
+        return $this->getSpaces($iCatId > 0 ? $iCatId : null);
+    }
+
+    function getMemberSpaces($iProfileId)
+    {
+        $iProfileId = (int)$iProfileId;
+        if($iProfileId <= 0) return array();
+        return $this->getAll(
+            "SELECT d.id, d.space_name AS title
+             FROM bx_spaces_data d
+             JOIN bx_spaces_fans f ON d.id = f.content
+             WHERE f.initiator = ? AND d.status = 'active' AND d.status_admin = 'active'
+             ORDER BY d.space_name ASC",
+            [$iProfileId]
         );
     }
 
@@ -29,6 +53,10 @@ class SaWardCouncilorDb extends BxDolModuleDb
         if(isset($aParams['status'])) {
             $sStatus = addslashes($aParams['status']);
             $sWhere .= " AND `status` = '$sStatus'";
+        } elseif(!isset($aParams['author_id'])) {
+            // Public views: show only active (approved) requests
+            // My Requests page (author_id set) shows all statuses
+            $sWhere .= " AND `status` = 'active'";
         }
         
         if(isset($aParams['space_id'])) {
@@ -264,6 +292,7 @@ class SaWardCouncilorDb extends BxDolModuleDb
         $sMunicipality = addslashes($aData['municipality']);
         $sProvince = addslashes($aData['province']);
         $sPopulation = (int)$aData['population'];
+        $sCouncillorName = isset($aData['councillor_name']) ? addslashes($aData['councillor_name']) : '';
         $sDescription = isset($aData['description']) ? addslashes($aData['description']) : '';
         $sOfficeAddress = isset($aData['office_address']) ? addslashes($aData['office_address']) : '';
         $sOfficeHours = isset($aData['office_hours']) ? addslashes($aData['office_hours']) : '';
@@ -279,6 +308,7 @@ class SaWardCouncilorDb extends BxDolModuleDb
                 `municipality` = '$sMunicipality',
                 `province` = '$sProvince',
                 `population` = $sPopulation,
+                `councillor_name` = '$sCouncillorName',
                 `description` = '$sDescription',
                 `office_address` = '$sOfficeAddress',
                 `office_hours` = '$sOfficeHours',
@@ -289,9 +319,9 @@ class SaWardCouncilorDb extends BxDolModuleDb
             return $this->query($sSql);
         } else {
             $sSql = "INSERT INTO `sa_ward_councilor_info` 
-                (`space_id`, `ward_number`, `municipality`, `province`, `population`, `description`,
+                (`space_id`, `ward_number`, `municipality`, `province`, `population`, `councillor_name`, `description`,
                  `office_address`, `office_hours`, `contact_phone`, `contact_email`, `created`) 
-                VALUES ($iSpaceId, '$sWardNumber', '$sMunicipality', '$sProvince', $sPopulation, '$sDescription',
+                VALUES ($iSpaceId, '$sWardNumber', '$sMunicipality', '$sProvince', $sPopulation, '$sCouncillorName', '$sDescription',
                         '$sOfficeAddress', '$sOfficeHours', '$sContactPhone', '$sContactEmail', NOW())";
             return $this->query($sSql);
         }
@@ -306,6 +336,8 @@ class SaWardCouncilorDb extends BxDolModuleDb
         $aStats = array(
             'total_requests' => 0,
             'pending_requests' => 0,
+            'active_requests' => 0,
+            'rejected_requests' => 0,
             'in_progress_requests' => 0,
             'resolved_requests' => 0,
             'upcoming_meetings' => 0,
@@ -319,6 +351,12 @@ class SaWardCouncilorDb extends BxDolModuleDb
         
         $sSql = "SELECT COUNT(*) FROM `sa_ward_councilor_requests` WHERE `status` = 'pending'" . ($iSpaceId ? " AND `space_id` = " . (int)$iSpaceId : "");
         $aStats['pending_requests'] = (int)$this->getOne($sSql);
+        
+        $sSql = "SELECT COUNT(*) FROM `sa_ward_councilor_requests` WHERE `status` = 'active'" . ($iSpaceId ? " AND `space_id` = " . (int)$iSpaceId : "");
+        $aStats['active_requests'] = (int)$this->getOne($sSql);
+        
+        $sSql = "SELECT COUNT(*) FROM `sa_ward_councilor_requests` WHERE `status` = 'rejected'" . ($iSpaceId ? " AND `space_id` = " . (int)$iSpaceId : "");
+        $aStats['rejected_requests'] = (int)$this->getOne($sSql);
         
         $sSql = "SELECT COUNT(*) FROM `sa_ward_councilor_requests` WHERE `status` = 'in_progress'" . ($iSpaceId ? " AND `space_id` = " . (int)$iSpaceId : "");
         $aStats['in_progress_requests'] = (int)$this->getOne($sSql);

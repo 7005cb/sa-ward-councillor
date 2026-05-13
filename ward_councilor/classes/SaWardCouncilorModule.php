@@ -24,6 +24,8 @@ class SaWardCouncilorModule extends BxDolModule
     
     protected $_aRequestStatuses = array(
         'pending' => 'Pending',
+        'active' => 'Active',
+        'rejected' => 'Rejected',
         'in_progress' => 'In Progress',
         'resolved' => 'Resolved',
         'closed' => 'Closed'
@@ -245,16 +247,47 @@ class SaWardCouncilorModule extends BxDolModule
 
     protected function _getCurrentSpaceId()
     {
-        // Try to get space ID from context
-        $iSpaceId = bx_get('space_id');
-        if($iSpaceId) return (int)$iSpaceId;
-        
-        // Check if we're in a space context
-        if(function_exists('bx_get_space_id')) {
-            return bx_get_space_id();
+        // 1. Explicit space_id param (our AJAX calls pass this directly)
+        $iSpaceId = (int)bx_get('space_id');
+        if(!$iSpaceId) $iSpaceId = (int)(isset($_GET['space_id']) ? $_GET['space_id'] : 0);
+        if($iSpaceId > 0) return $iSpaceId;
+
+        // 2. UNA Space profile page — URL is /view-space-profile/eersterust
+        //    BxDolPage::processSeoLink() sets $_GET['id'] = bx_spaces_data.id
+        //    We join to sys_profiles to get the profile ID used as space_id
+        $iContentId = (int)bx_get('id');
+        if(!$iContentId) $iContentId = (int)(isset($_GET['id']) ? $_GET['id'] : 0);
+        if($iContentId > 0) {
+            // Confirm we're on a space page (not some other module's 'id' param)
+            $sPageUri = bx_get('i');
+            if(!$sPageUri) $sPageUri = isset($_GET['i']) ? $_GET['i'] : '';
+            $aSpacePageUris = array('view-space-profile', 'view-space-profile-closed', 'space-profile-info');
+            if(in_array($sPageUri, $aSpacePageUris) || strpos((string)$_SERVER['REQUEST_URI'], 'view-space-profile') !== false) {
+                $oDb = BxDolDb::getInstance();
+                $iSpaceId = (int)$oDb->getOne(
+                    $oDb->prepare(
+                        "SELECT p.id FROM sys_profiles p
+                         WHERE p.content_id = ? AND p.type = 'bx_spaces' AND p.status = 'active'
+                         LIMIT 1",
+                        $iContentId
+                    )
+                );
+                if($iSpaceId > 0) return $iSpaceId;
+            }
         }
-        
-        return null;
+
+        // 3. profile_id passed directly
+        $iProfileId = (int)bx_get('profile_id');
+        if(!$iProfileId) $iProfileId = (int)(isset($_GET['profile_id']) ? $_GET['profile_id'] : 0);
+        if($iProfileId > 0) {
+            $oDb = BxDolDb::getInstance();
+            $sType = $oDb->getOne(
+                $oDb->prepare("SELECT type FROM sys_profiles WHERE id=? LIMIT 1", $iProfileId)
+            );
+            if($sType === 'bx_spaces') return $iProfileId;
+        }
+
+        return 0;
     }
 
     protected function _isCouncilor()
@@ -1233,60 +1266,97 @@ class SaWardCouncilorModule extends BxDolModule
 
     protected function _renderManageRequests($iSpaceId)
     {
-        $sStatus = bx_get('status');
+        if(!$this->_isCouncilor())
+            return MsgBox(_t('_Access Denied'));
+
+        $sStatusFilter = bx_get('status');
         $aParams = array();
         if($iSpaceId) $aParams['space_id'] = $iSpaceId;
-        if($sStatus) $aParams['status'] = $sStatus;
+        if($sStatusFilter) $aParams['status'] = $sStatusFilter;
 
         $aRequests = $this->_oDb->getServiceRequests($aParams);
         $aStats    = $this->_oDb->getStats($iSpaceId);
 
-        $sTabs = '<a href="page.php?i=ward-manage&manage_tab=requests" class="wc-tab' . (!$sStatus?' active':'') . '">All (' . $aStats['total_requests'] . ')</a>';
+        $sTabs = '<a href="page.php?i=ward-manage&manage_tab=requests" class="wc-tab' . (!$sStatusFilter?' active':'') . '">All (' . $aStats['total_requests'] . ')</a>';
         foreach($this->_aRequestStatuses as $sKey => $sLabel) {
             $sCount = isset($aStats[$sKey.'_requests']) ? $aStats[$sKey.'_requests'] : 0;
-            $sTabs .= '<a href="page.php?i=ward-manage&manage_tab=requests&status='.$sKey.'" class="wc-tab'.($sStatus==$sKey?' active':'').'">' . $sLabel . ' (' . $sCount . ')</a>';
+            $sTabs .= '<a href="page.php?i=ward-manage&manage_tab=requests&status='.$sKey.'" class="wc-tab'.($sStatusFilter==$sKey?' active':'').'">' . $sLabel . ' (' . $sCount . ')</a>';
         }
 
         $sRows = '';
         $aGroups = $this->_groupByMonth($aRequests, 'created');
         foreach($aGroups as $sMonth => $aGroup) {
-            $sRows .= '<tr><td colspan="7" class="wc-table-month-row">' . htmlspecialchars($sMonth) . ' <span class="wc-month-count">(' . count($aGroup) . ')</span></td></tr>';
+            $sRows .= '<tr><td colspan="8" class="wc-table-month-row">' . htmlspecialchars($sMonth) . ' <span class="wc-month-count">(' . count($aGroup) . ')</span></td></tr>';
             foreach($aGroup as $aR) {
-                $sRows .= '<tr>
-                    <td><a href="' . BX_DOL_URL_ROOT . 'page.php?i=view-ward-request&id='.$aR['id'].'">' . htmlspecialchars($aR['reference_number']) . '</a></td>
-                    <td>' . htmlspecialchars(substr($aR['title'],0,50)) . '</td>
-                    <td>' . $this->_getCategoryLabel($aR['category']) . '</td>
-                    <td><span class="wc-status wc-status-'.$aR['status'].'">' . $this->_getStatusLabel($aR['status']) . '</span></td>
-                    <td>' . $this->_getPriorityLabel($aR['priority']) . '</td>
-                    <td>' . $this->_timeAgo($aR['created']) . '</td>
-                    <td><a href="' . BX_DOL_URL_ROOT . 'page.php?i=view-ward-request&id='.$aR['id'].'" class="wc-btn wc-btn-secondary" style="padding:4px 10px;font-size:12px;">Manage</a></td>
-                </tr>';
+                $sActions = '';
+                switch($aR['status']) {
+                    case 'pending':
+                        $sActions = '<button type="button" class="wc-btn wc-btn-primary wc-btn-xs" onclick="wcModerateRequest('.$aR['id'].',\'approve\',this)">✓ Approve</button> ';
+                        $sActions .= '<button type="button" class="wc-btn wc-btn-secondary wc-btn-xs" onclick="wcModerateRequest('.$aR['id'].',\'reject\',this)">✕ Reject</button>';
+                        break;
+                    case 'active':
+                        $sActions = '<button type="button" class="wc-btn wc-btn-primary wc-btn-xs" onclick="wcModerateRequest('.$aR['id'].',\'in_progress\',this)">▶ In Progress</button> ';
+                        $sActions .= '<button type="button" class="wc-btn wc-btn-secondary wc-btn-xs" onclick="wcModerateRequest('.$aR['id'].',\'resolved\',this)">✓ Resolved</button>';
+                        break;
+                    case 'in_progress':
+                        $sActions = '<button type="button" class="wc-btn wc-btn-primary wc-btn-xs" onclick="wcModerateRequest('.$aR['id'].',\'resolved\',this)">✓ Resolved</button>';
+                        break;
+                    case 'resolved':
+                    case 'closed':
+                    case 'rejected':
+                        $sActions = '<span class="wc-muted">—</span>';
+                        break;
+                }
+                $sRows .= '<tr>';
+                $sRows .= '<td><a href="' . BX_DOL_URL_ROOT . 'page.php?i=view-ward-request&id='.$aR['id'].'">' . htmlspecialchars($aR['reference_number']) . '</a></td>';
+                $sRows .= '<td>' . htmlspecialchars(substr($aR['title'],0,50)) . '</td>';
+                $sRows .= '<td>' . $this->_getCategoryLabel($aR['category']) . '</td>';
+                $sRows .= '<td><span class="wc-status wc-status-'.$aR['status'].'">' . $this->_getStatusLabel($aR['status']) . '</span></td>';
+                $sRows .= '<td>' . $this->_getPriorityLabel($aR['priority']) . '</td>';
+                $sRows .= '<td>' . $this->_timeAgo($aR['created']) . '</td>';
+                $sRows .= '<td class="wc-actions-cell">' . $sActions . '</td>';
+                $sRows .= '</tr>';
             }
         }
-        if(!$sRows) $sRows = '<tr><td colspan="7" style="text-align:center;padding:20px;">No requests found</td></tr>';
+        if(!$sRows) $sRows = '<tr><td colspan="8" style="text-align:center;padding:20px;">No requests found</td></tr>';
 
-        return '<div class="wc-section">
-            <div class="wc-section-header">
-                <div class="wc-h2">📋 All Service Requests</div>
-                <a href="' . BX_DOL_URL_ROOT . 'page.php?i=create-ward-request" class="wc-btn wc-btn-primary" style="padding:6px 14px;font-size:13px;">+ New</a>
-            </div>
-            <div class="wc-status-filter">' . $sTabs . '</div>
-            <div style="overflow-x:auto;">
-            <table style="width:100%;border-collapse:collapse;font-size:14px;">
-                <thead><tr style="border-bottom:2px solid var(--wc-border);">
-                    <th style="padding:8px;text-align:left;">Ref</th>
-                    <th style="padding:8px;text-align:left;">Title</th>
-                    <th style="padding:8px;text-align:left;">Category</th>
-                    <th style="padding:8px;text-align:left;">Status</th>
-                    <th style="padding:8px;text-align:left;">Priority</th>
-                    <th style="padding:8px;text-align:left;">Submitted</th>
-                    <th style="padding:8px;text-align:left;">Action</th>
-                </tr></thead>
-                <tbody>' . $sRows . '</tbody>
-            </table>
-            </div>
-        </div>';
+        $sJs  = '<script>';
+        $sJs .= 'window.wcModerateRequest=function(id,action,btn){';
+        $sJs .=   'btn.disabled=true;btn.textContent="...";';
+        $sJs .=   "var url='" . BX_DOL_URL_ROOT . "modules/sa/ward_councilor/request.php?action=moderate_request&id='+id+'&mod_action='+action;";
+        $sJs .=   'fetch(url,{credentials:"same-origin"})';
+        $sJs .=     '.then(function(r){return r.json();})';
+        $sJs .=     '.then(function(j){';
+        $sJs .=       'if(j&&j.success){btn.closest("tr").style.opacity="0.5";btn.closest(".wc-actions-cell").innerHTML="<span class=\"wc-muted\">"+j.new_status+"</span>";}';
+        $sJs .=       'else{alert("Error: "+(j&&j.error||"unknown"));btn.disabled=false;}';
+        $sJs .=     '})';
+        $sJs .=     '.catch(function(){alert("Network error");btn.disabled=false;});';
+        $sJs .= '};';
+        $sJs .= '</script>';
+
+        return '<div class="wc-section">' .
+            '<div class="wc-section-header">' .
+                '<div class="wc-h2">📋 All Service Requests</div>' .
+                '<a href="' . BX_DOL_URL_ROOT . 'page.php?i=create-ward-request" class="wc-btn wc-btn-primary" style="padding:6px 14px;font-size:13px;">+ New</a>' .
+            '</div>' .
+            '<div class="wc-status-filter">' . $sTabs . '</div>' .
+            '<div style="overflow-x:auto;">' .
+            '<table style="width:100%;border-collapse:collapse;font-size:14px;">' .
+                '<thead><tr style="border-bottom:2px solid var(--wc-border);">' .
+                    '<th style="padding:8px;text-align:left;">Ref</th>' .
+                    '<th style="padding:8px;text-align:left;">Title</th>' .
+                    '<th style="padding:8px;text-align:left;">Category</th>' .
+                    '<th style="padding:8px;text-align:left;">Status</th>' .
+                    '<th style="padding:8px;text-align:left;">Priority</th>' .
+                    '<th style="padding:8px;text-align:left;">Submitted</th>' .
+                    '<th style="padding:8px;text-align:left;">Action</th>' .
+                '</tr></thead>' .
+                '<tbody>' . $sRows . '</tbody>' .
+            '</table>' .
+            '</div>' .
+        '</div>' . $sJs;
     }
+
 
     protected function _renderManageMeetings($iSpaceId)
     {
@@ -1361,14 +1431,33 @@ class SaWardCouncilorModule extends BxDolModule
     protected function _renderManageWardInfo($iSpaceId)
     {
         $sMessage = '';
-        $aWardInfo = $iSpaceId ? $this->_oDb->getWardInfo($iSpaceId) : array();
+        $bEditMode = false;
 
+        // Handle space selection from dropdown
+        $iSelectedSpaceId = (int)bx_get('ward_space_id');
+        if($iSelectedSpaceId > 0) {
+            $iSpaceId = $iSelectedSpaceId;
+        }
+
+        // Handle edit mode toggle
+        if(bx_get('edit_ward_info') === '1') {
+            $bEditMode = true;
+        }
+
+        // Save handler
         if($_SERVER['REQUEST_METHOD'] === 'POST' && bx_get('ward_info_save')) {
+            $iPostSpaceId = (int)bx_get('space_id');
+            if($iPostSpaceId > 0) $iSpaceId = $iPostSpaceId;
+            $iDropdownSpaceId = (int)bx_get('ward_space_id');
+            if($iDropdownSpaceId > 0) $iSpaceId = $iDropdownSpaceId;
+
             $aData = array(
                 'space_id'       => (int)$iSpaceId,
+                'councillor_name'=> bx_get('councillor_name'),
                 'ward_number'    => bx_get('ward_number'),
                 'municipality'   => bx_get('municipality'),
                 'province'       => bx_get('province'),
+                'population'     => bx_get('population'),
                 'description'    => bx_get('description'),
                 'office_address' => bx_get('office_address'),
                 'office_hours'   => bx_get('office_hours'),
@@ -1376,27 +1465,54 @@ class SaWardCouncilorModule extends BxDolModule
                 'contact_email'  => bx_get('contact_email'),
             );
             if($this->_oDb->saveWardInfo($aData)) {
-                $aWardInfo = $this->_oDb->getWardInfo($iSpaceId);
+                $sMessage = '<div class="wc-success">✅ Ward info saved successfully!</div>';
+                $bEditMode = false; // return to read-only after save
             } else {
                 $sMessage = '<div class="wc-error">Error saving ward info.</div>';
+                $bEditMode = true; // stay on edit if save failed
             }
         }
+
+        // Load existing ward info for selected space
+        $aWardInfo = $iSpaceId ? $this->_oDb->getWardInfo($iSpaceId) : array();
+        $bHasRecord = !empty($aWardInfo);
+
+        // Determine mode: show edit form if no record yet, or if edit requested, or if save failed
+        $bShowEditForm = !$bHasRecord || $bEditMode;
 
         $v = function($key) use ($aWardInfo) {
             return htmlspecialchars(isset($aWardInfo[$key]) ? $aWardInfo[$key] : '');
         };
 
-        return '<div class="wc-section">
-            <div class="wc-section-header"><div class="wc-h2">🏘️ Ward Information</div></div>
-            ' . $sMessage . '
-            <form method="post" class="wc-form">
-                <input type="hidden" name="ward_info_save" value="1">
+        // Build space selector dropdown — member spaces first, fall back to all active
+        $iProfileId = (int)bx_get_logged_profile_id();
+        $aSpaces = $this->_oDb->getMemberSpaces($iProfileId);
+        if(empty($aSpaces)) {
+            $aSpaces = $this->_oDb->getSpaces();
+        }
+        $sSpaceOptions = '<option value="">🌍 Select a ward/space...</option>';
+        foreach($aSpaces as $aSpace) {
+            $sSelected = ($iSpaceId == $aSpace['id']) ? ' selected' : '';
+            $sSpaceOptions .= '<option value="' . $aSpace['id'] . '"' . $sSelected . '>🏠 ' . htmlspecialchars($aSpace['title']) . '</option>';
+        }
+
+        // Build form content
+        $sFormContent = '';
+        if($iSpaceId <= 0) {
+            $sFormContent = '<p class="wc-empty">Select a ward/space above to manage its information.</p>';
+        } elseif($bShowEditForm) {
+            // EDITABLE FORM
+            $sFormContent = '
                 <div class="wc-form-row">
+                    <div class="wc-form-group"><label>Ward Councillor</label><input type="text" name="councillor_name" value="' . $v('councillor_name') . '" placeholder="Councillor full name"></div>
                     <div class="wc-form-group"><label>Ward Number</label><input type="text" name="ward_number" value="' . $v('ward_number') . '"></div>
-                    <div class="wc-form-group"><label>Municipality</label><input type="text" name="municipality" value="' . $v('municipality') . '"></div>
                 </div>
                 <div class="wc-form-row">
+                    <div class="wc-form-group"><label>Municipality</label><input type="text" name="municipality" value="' . $v('municipality') . '"></div>
                     <div class="wc-form-group"><label>Province</label><input type="text" name="province" value="' . $v('province') . '"></div>
+                </div>
+                <div class="wc-form-row">
+                    <div class="wc-form-group"><label>Population</label><input type="number" name="population" value="' . $v('population') . '"></div>
                     <div class="wc-form-group"><label>Office Hours</label><input type="text" name="office_hours" value="' . $v('office_hours') . '"></div>
                 </div>
                 <div class="wc-form-group"><label>Office Address</label><input type="text" name="office_address" value="' . $v('office_address') . '"></div>
@@ -1405,7 +1521,50 @@ class SaWardCouncilorModule extends BxDolModule
                     <div class="wc-form-group"><label>Contact Email</label><input type="email" name="contact_email" value="' . $v('contact_email') . '"></div>
                 </div>
                 <div class="wc-form-group"><label>Ward Description</label><textarea name="description" rows="4">' . $v('description') . '</textarea></div>
-                <button type="submit" class="wc-btn wc-btn-primary">💾 Save Ward Info</button>
+                <button type="submit" class="wc-btn wc-btn-primary">💾 Save Ward Info</button>';
+        } else {
+            // READ-ONLY VIEW
+            $sFormContent = '
+                <div class="wc-view-grid">
+                    <div class="wc-view-row">
+                        <div class="wc-view-field"><span class="wc-view-label">Ward Councillor</span><span class="wc-view-sep">: </span><span class="wc-view-val">' . ($v('councillor_name') ?: '—') . '</span></div>
+                        <div class="wc-view-field"><span class="wc-view-label">Ward Number</span><span class="wc-view-sep">: </span><span class="wc-view-val">' . ($v('ward_number') ?: '—') . '</span></div>
+                    </div>
+                    <div class="wc-view-row">
+                        <div class="wc-view-field"><span class="wc-view-label">Municipality</span><span class="wc-view-sep">: </span><span class="wc-view-val">' . ($v('municipality') ?: '—') . '</span></div>
+                        <div class="wc-view-field"><span class="wc-view-label">Province</span><span class="wc-view-sep">: </span><span class="wc-view-val">' . ($v('province') ?: '—') . '</span></div>
+                    </div>
+                    <div class="wc-view-row">
+                        <div class="wc-view-field"><span class="wc-view-label">Population</span><span class="wc-view-sep">: </span><span class="wc-view-val">' . ($v('population') ? number_format((int)$aWardInfo['population']) : '—') . '</span></div>
+                        <div class="wc-view-field"><span class="wc-view-label">Office Hours</span><span class="wc-view-sep">: </span><span class="wc-view-val">' . ($v('office_hours') ?: '—') . '</span></div>
+                    </div>
+                    <div class="wc-view-field"><span class="wc-view-label">Office Address</span><span class="wc-view-sep">: </span><span class="wc-view-val">' . ($v('office_address') ?: '—') . '</span></div>
+                    <div class="wc-view-row">
+                        <div class="wc-view-field"><span class="wc-view-label">Contact Phone</span><span class="wc-view-sep">: </span><span class="wc-view-val">' . ($v('contact_phone') ?: '—') . '</span></div>
+                        <div class="wc-view-field"><span class="wc-view-label">Contact Email</span><span class="wc-view-sep">: </span><span class="wc-view-val">' . ($v('contact_email') ?: '—') . '</span></div>
+                    </div>
+                    <div class="wc-view-field"><span class="wc-view-label">Ward Description</span><span class="wc-view-sep">: </span><span class="wc-view-val wc-view-desc">' . ($v('description') ?: '—') . '</span></div>
+                </div>
+                <a href="page.php?i=ward-manage&manage_tab=ward_info&ward_space_id=' . (int)$iSpaceId . '&edit_ward_info=1" class="wc-btn wc-btn-secondary">✏️ Edit</a>';
+        }
+
+        return '<div class="wc-section">
+            <div class="wc-section-header"><div class="wc-h2">🏘️ Ward Information</div></div>
+            ' . $sMessage . '
+            <form method="post" class="wc-form" id="ward-info-form">
+                <input type="hidden" name="ward_info_save" value="1">
+                <input type="hidden" name="space_id" value="' . (int)$iSpaceId . '">
+                <div class="wc-form-group">
+                    <label>Select Ward/Space</label>
+                    <select name="ward_space_id" class="wc-form-control" onchange="window.location.href=\'page.php?i=ward-manage&manage_tab=ward_info&ward_space_id=\'+this.value">
+                        ' . $sSpaceOptions . '
+                    </select>
+                </div>
+            </form>
+            <form method="post" class="wc-form">
+                <input type="hidden" name="ward_info_save" value="1">
+                <input type="hidden" name="space_id" value="' . (int)$iSpaceId . '">
+                ' . $sFormContent . '
             </form>
         </div>';
     }
@@ -1602,6 +1761,151 @@ class SaWardCouncilorModule extends BxDolModule
             'author'      => (int)$aEntry['author_id'],
             'added'       => strtotime($aEntry['created']),
             'privacy'     => (int)($aEntry['allow_view_to'] ? $aEntry['allow_view_to'] : 3),
+        );
+    }
+
+    // ──────────────────────────────────────────────────────────────────────
+
+    // =========================================================
+    // SPACE PAGE INLINE SUMMARY BLOCK
+    // Renders compact ward stats + recent items directly on the
+    // Space profile page. No navigation away required.
+    // =========================================================
+
+    public function serviceGetSpaceSummaryBlock()
+    {
+        $this->_oTemplate->addCss(array('main.css', 'nav.css'));
+
+        $iSpaceId = (int)$this->_getCurrentSpaceId();
+        if(!$iSpaceId) return '';
+
+        $sRoot    = BX_DOL_URL_ROOT;
+        $aStats   = $this->_oDb->getStats($iSpaceId);
+
+        // Recent 3 requests
+        $aRequests = $this->_oDb->getServiceRequests(array('space_id' => $iSpaceId, 'limit' => 3));
+        $sRequests = '';
+        foreach($aRequests as $r) {
+            $sRequests .= '<div class="wc-sum-item">
+                <span class="wc-status wc-status-' . $r['status'] . '">' . $this->_getStatusLabel($r['status']) . '</span>
+                <a href="' . $sRoot . 'page.php?i=view-ward-request&id=' . $r['id'] . '&space_id=' . $iSpaceId . '">'  . htmlspecialchars(mb_strimwidth($r['title'], 0, 60, '…')) . '</a>
+                <span class="wc-sum-meta">' . $this->_timeAgo($r['created']) . '</span>
+            </div>';
+        }
+
+        // Next 1 meeting
+        $aMeetings = $this->_oDb->getMeetings(array('space_id' => $iSpaceId, 'upcoming' => 1, 'limit' => 1));
+        $sMeeting = '';
+        if(!empty($aMeetings)) {
+            $m = $aMeetings[0];
+            $sMeeting = '<div class="wc-sum-meeting">
+                <span class="wc-sum-meeting-date">' . date('d M', strtotime($m['meeting_date'])) . '</span>
+                <a href="' . $sRoot . 'page.php?i=view-ward-meeting&id=' . $m['id'] . '&space_id=' . $iSpaceId . '">' . htmlspecialchars($m['title']) . '</a>
+                <span class="wc-sum-meta">@ ' . htmlspecialchars($m['location']) . '</span>
+            </div>';
+        }
+
+        // Latest announcement
+        $aAnns = $this->_oDb->getAnnouncements(array('space_id' => $iSpaceId, 'status' => 'published', 'limit' => 1));
+        $sAnn = '';
+        if(!empty($aAnns)) {
+            $a = $aAnns[0];
+            $sAnn = '<div class="wc-sum-item">
+                ' . ($a['pinned'] ? '<span class="wc-status" style="background:rgba(0,119,73,0.15);color:#6ee7b7;">Pinned</span>' : '') . '
+                <a href="' . $sRoot . 'page.php?i=view-ward-announcement&id=' . $a['id'] . '&space_id=' . $iSpaceId . '">' . htmlspecialchars(mb_strimwidth($a['title'], 0, 60, '…')) . '</a>
+                <span class="wc-sum-meta">' . $this->_timeAgo($a['created']) . '</span>
+            </div>';
+        }
+
+        $sSubmitBtn = isLogged()
+            ? '<a href="' . $sRoot . 'page.php?i=create-ward-request&space_id=' . $iSpaceId . '" class="wc-sum-action-btn">+ Submit Request</a>'
+            : '';
+
+        return '<div class="wc-space-summary">
+
+            <div class="wc-sum-stats">
+                <div class="wc-sum-stat">
+                    <span class="wc-sum-stat-val">' . $aStats['total_requests'] . '</span>
+                    <span class="wc-sum-stat-lbl">Requests</span>
+                </div>
+                <div class="wc-sum-stat wc-sum-stat-warn">
+                    <span class="wc-sum-stat-val">' . $aStats['pending_requests'] . '</span>
+                    <span class="wc-sum-stat-lbl">Pending</span>
+                </div>
+                <div class="wc-sum-stat wc-sum-stat-ok">
+                    <span class="wc-sum-stat-val">' . $aStats['resolved_requests'] . '</span>
+                    <span class="wc-sum-stat-lbl">Resolved</span>
+                </div>
+                <div class="wc-sum-stat">
+                    <span class="wc-sum-stat-val">' . $aStats['upcoming_meetings'] . '</span>
+                    <span class="wc-sum-stat-lbl">Meetings</span>
+                </div>
+            </div>
+
+            ' . ($sRequests ? '
+            <div class="wc-sum-section">
+                <div class="wc-sum-section-hdr">
+                    <span>Recent Requests</span>
+                    <a href="' . $sRoot . 'page.php?i=ward-requests&space_id=' . $iSpaceId . '">View all &rsaquo;</a>
+                </div>
+                ' . $sRequests . '
+            </div>' : '') . '
+
+            ' . ($sMeeting ? '
+            <div class="wc-sum-section">
+                <div class="wc-sum-section-hdr">
+                    <span>Next Meeting</span>
+                    <a href="' . $sRoot . 'page.php?i=ward-meetings&space_id=' . $iSpaceId . '">All meetings &rsaquo;</a>
+                </div>
+                ' . $sMeeting . '
+            </div>' : '') . '
+
+            ' . ($sAnn ? '
+            <div class="wc-sum-section">
+                <div class="wc-sum-section-hdr">
+                    <span>Latest Announcement</span>
+                    <a href="' . $sRoot . 'page.php?i=ward-announcements&space_id=' . $iSpaceId . '">All &rsaquo;</a>
+                </div>
+                ' . $sAnn . '
+            </div>' : '') . '
+
+            ' . ($sSubmitBtn ? '<div class="wc-sum-actions">' . $sSubmitBtn . '</div>' : '') . '
+
+        </div>';
+    }
+
+    // =========================================================
+    // NAV STRIP + SIDEBAR — public service entry points
+    // Called by sys_pages_blocks via the 'service' type.
+    // =========================================================
+
+    public function serviceGetWardNavStrip()
+    {
+        $iSpaceId = (int)$this->_getCurrentSpaceId();
+        if(!$iSpaceId) $iSpaceId = $this->_resolveSpaceFromProfileIdentifier();
+        return $this->_oTemplate->getWardNavStrip($iSpaceId);
+    }
+
+    public function serviceGetSidebarBlock()
+    {
+        $iSpaceId = (int)$this->_getCurrentSpaceId();
+        if(!$iSpaceId) $iSpaceId = $this->_resolveSpaceFromProfileIdentifier();
+        return $this->_oTemplate->getSidebarBlock($iSpaceId);
+    }
+
+    protected function _resolveSpaceFromProfileIdentifier()
+    {
+        $sUri = isset($_GET['profile_identifier']) ? trim($_GET['profile_identifier']) : '';
+        if(!$sUri) return 0;
+        $oDb = BxDolDb::getInstance();
+        return (int)$oDb->getOne(
+            $oDb->prepare(
+                "SELECT p.id FROM sys_profiles p
+                 JOIN bx_spaces_data d ON p.content_id = d.id
+                 WHERE p.type = 'bx_spaces' AND p.uri = ? AND p.status = 'active'
+                 LIMIT 1",
+                $sUri
+            )
         );
     }
 

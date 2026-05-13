@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS `sa_ward_councilor_requests` (
   `description` text,
   `category` varchar(100) DEFAULT NULL,
   `priority` enum('low','medium','high','urgent') NOT NULL DEFAULT 'medium',
-  `status` enum('pending','in_progress','resolved','closed') NOT NULL DEFAULT 'pending',
+  `status` enum('pending','active','rejected','in_progress','resolved','closed') NOT NULL DEFAULT 'pending',
   `location` varchar(500) DEFAULT NULL,
   `contact_phone` varchar(50) DEFAULT NULL,
   `contact_email` varchar(255) DEFAULT NULL,
@@ -106,6 +106,7 @@ CREATE TABLE IF NOT EXISTS `sa_ward_councilor_info` (
   `municipality` varchar(255) DEFAULT NULL,
   `province` varchar(100) DEFAULT NULL,
   `population` int(11) DEFAULT NULL,
+  `councillor_name` varchar(255) DEFAULT NULL,
   `description` text,
   `office_address` varchar(500) DEFAULT NULL,
   `office_hours` varchar(255) DEFAULT NULL,
@@ -294,7 +295,8 @@ VALUES
   ('sa_ward_councilor', 'edit own entry',   NULL, '_acl_txt_sa_ward_councilor_edit_own_entry',   '', 0, ''),
   ('sa_ward_councilor', 'edit any entry',   NULL, '_acl_txt_sa_ward_councilor_edit_any_entry',   '', 0, ''),
   ('sa_ward_councilor', 'delete own entry', NULL, '_acl_txt_sa_ward_councilor_delete_own_entry', '', 0, ''),
-  ('sa_ward_councilor', 'delete any entry', NULL, '_acl_txt_sa_ward_councilor_delete_any_entry', '', 0, '');
+  ('sa_ward_councilor', 'delete any entry', NULL, '_acl_txt_sa_ward_councilor_delete_any_entry', '', 0, ''),
+  ('sa_ward_councilor', 'approve entry',   NULL, '_acl_txt_sa_ward_councilor_approve_entry',   '', 0, '');
 
 -- Grant Standard members (level 3) basic content rights
 INSERT INTO `sys_acl_matrix` (`IDLevel`, `IDAction`)

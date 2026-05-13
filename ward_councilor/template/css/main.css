@@ -35,6 +35,22 @@
     transition: background 0.2s;
 }
 .wc-btn-secondary:hover { background: var(--color-box-border, #e0e0e0); }
+.wc-btn-xs {
+    padding: 3px 8px;
+    font-size: 11px;
+    font-weight: 500;
+}
+.wc-actions-cell {
+    white-space: nowrap;
+    text-align: center;
+}
+.wc-actions-cell .wc-btn {
+    margin: 0 2px;
+}
+.wc-muted {
+    color: var(--color-text-muted, #999);
+    font-size: 12px;
+}
 .wc-tab {
     display: inline-block;
     padding: 8px 16px;
@@ -790,4 +806,60 @@ a.wc-link:hover { color: var(--color-link-hover, #005a35); }
     background: var(--color-bg-secondary, #f9f9f9) !important;
     padding: 10px 8px !important;
     border-top: 2px solid var(--color-primary, #007749);
+}
+
+/* =====================================================
+   Ward Info — Read-only view
+   ===================================================== */
+.wc-view-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+.wc-view-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+.wc-view-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.wc-view-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-muted, #888);
+}
+.wc-view-sep {
+    display: inline;
+    color: var(--color-text-muted, #888);
+    font-weight: 400;
+    margin-right: 4px;
+}
+.wc-view-val {
+    font-size: 14px;
+    color: var(--color-text, #2d2d2d);
+    padding: 8px 12px;
+    background: var(--color-bg-secondary, #f9f9f9);
+    border: 1px solid var(--color-box-border, #e8e8e8);
+    border-radius: var(--border-radius, 4px);
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+}
+.wc-view-desc {
+    white-space: pre-wrap;
+    line-height: 1.5;
+    align-items: flex-start !important;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+/* Nav strip collapsed state */
+.wc-nav-strip.wc-collapsed .wc-nav-strip-label {
+    opacity: 0.6;
 }

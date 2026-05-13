@@ -1,0 +1,377 @@
+/* =============================================================
+   Ward Councilor — Nav Strip + Collapsible Sidebar
+   Artificer-first. Scoped to .wc- prefix.
+   ============================================================= */
+
+/* ── Ward context strip ─────────────────────────────────────── */
+.wc-nav-strip {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 0 8px;
+    min-height: 36px;
+    background: rgba(0, 119, 73, 0.07) !important;
+    border-bottom: 2px solid rgba(0, 119, 73, 0.18) !important;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.wc-nav-strip::-webkit-scrollbar { display: none; }
+
+.wc-nav-strip-label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--color-text-tertiary, #aaa);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    padding: 0 10px 0 2px;
+    border-right: 1px solid rgba(0, 0, 0, 0.1);
+    margin-right: 2px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    cursor: default;
+    pointer-events: none;
+}
+
+.wc-nav-strip-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0 9px;
+    height: 26px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-text-secondary, rgba(80,80,80,0.85));
+    text-decoration: none !important;
+    white-space: nowrap;
+    flex-shrink: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+.wc-nav-strip-btn:hover {
+    background: rgba(0, 119, 73, 0.1);
+    color: rgba(0, 119, 73, 1) !important;
+}
+.wc-nav-strip-btn.wc-active {
+    background: rgba(0, 119, 73, 0.14);
+    color: rgba(0, 119, 73, 1) !important;
+    font-weight: 600;
+}
+.wc-nav-strip-btn .sys-icon { font-size: 12px; }
+
+/* Toggle button on right side of nav strip — text + arrow */
+.wc-nav-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    height: 22px;
+    padding: 0 6px;
+    border: none;
+    border-radius: 3px;
+    background: transparent;
+    color: var(--color-text-tertiary, #aaa);
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: background 0.15s, color 0.15s;
+}
+.wc-nav-toggle:hover {
+    background: rgba(0, 119, 73, 0.08);
+    color: rgba(0, 119, 73, 1);
+}
+.wc-nav-toggle-icon {
+    font-size: 9px;
+    line-height: 1;
+}
+.wc-nav-toggle-label {
+    font-size: 11px;
+    line-height: 1;
+}
+
+/* Dark theme strip */
+.bx-lucid .wc-nav-strip,
+html[data-theme="dark"] .wc-nav-strip {
+    background: rgba(0, 119, 73, 0.1) !important;
+    border-bottom-color: rgba(0, 119, 73, 0.28) !important;
+}
+.bx-lucid .wc-nav-strip-label,
+html[data-theme="dark"] .wc-nav-strip-label {
+    color: rgba(180,180,180,0.5) !important;
+    border-right-color: rgba(255,255,255,0.1) !important;
+}
+.bx-lucid .wc-nav-strip-btn,
+html[data-theme="dark"] .wc-nav-strip-btn { color: rgba(200,200,200,0.75) !important; }
+.bx-lucid .wc-nav-strip-btn:hover,
+html[data-theme="dark"] .wc-nav-strip-btn:hover,
+.bx-lucid .wc-nav-strip-btn.wc-active,
+html[data-theme="dark"] .wc-nav-strip-btn.wc-active {
+    background: rgba(0,119,73,0.18) !important;
+    color: #6ee7b7 !important;
+}
+
+/* ── Nav panel ─────────────────────────────────────────────── */
+/* Connects visually to the strip — no gap, left border accent */
+.wc-nav-panel {
+    display: none;              /* hidden until a tab is clicked */
+    border-left: 3px solid rgba(0,119,73,0.25);
+    margin: 0;
+    padding: 12px 14px 12px 16px;
+    background: var(--color-background-secondary, rgba(0,0,0,0.02));
+    border-bottom: 1px solid rgba(0,119,73,0.12);
+}
+.wc-nav-panel[style*="block"] { display: block; }
+
+.wc-panel-loading {
+    padding: 10px 0;
+    color: var(--color-text-tertiary, #aaa);
+    font-size: 12px;
+    line-height: 1.5;
+}
+.wc-panel-inner {
+    line-height: 1.55 !important;
+    font-size: 13px !important;
+    font-family: inherit !important;
+}
+.wc-panel-inner * { line-height: 1.55 !important; }
+
+/* ── Summary block ─────────────────────────────────────────── */
+.wc-space-summary { font-size: 13px; }
+
+/* Stats row — compact horizontal pills instead of tall boxes */
+.wc-sum-stats {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+.wc-sum-stat {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--color-background-primary, rgba(255,255,255,0.6));
+    border: 1px solid var(--color-border-tertiary, rgba(0,0,0,0.08));
+    border-radius: 20px;
+    padding: 4px 12px 4px 10px;
+    min-width: 80px;
+}
+.wc-sum-stat-warn { border-color: rgba(255,152,0,0.4); }
+.wc-sum-stat-ok   { border-color: rgba(0,119,73,0.35); }
+.wc-sum-stat-val {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--color-text-primary, #222);
+    line-height: 1;
+}
+.wc-sum-stat-warn .wc-sum-stat-val { color: rgba(200,120,0,0.9); }
+.wc-sum-stat-ok   .wc-sum-stat-val { color: rgba(0,119,73,0.9); }
+.wc-sum-stat-lbl {
+    font-size: 11px;
+    color: var(--color-text-tertiary, #999);
+    line-height: 1.2;
+}
+
+/* Sections */
+.wc-sum-section {
+    border-top: 1px solid var(--color-border-tertiary, rgba(0,0,0,0.07));
+    padding-top: 8px;
+    margin-top: 8px;
+}
+.wc-sum-section-hdr {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-tertiary, #999);
+}
+.wc-sum-section-hdr a {
+    font-weight: 400;
+    font-size: 11px;
+    text-transform: none;
+    letter-spacing: 0;
+    color: rgba(0,119,73,0.85) !important;
+    text-decoration: none;
+}
+.wc-sum-section-hdr a:hover { text-decoration: underline; }
+
+.wc-sum-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 0;
+    border-bottom: 1px solid var(--color-border-tertiary, rgba(0,0,0,0.04));
+}
+.wc-sum-item:last-child { border-bottom: none; }
+.wc-sum-item a {
+    flex: 1;
+    font-size: 12.5px;
+    color: var(--color-text-primary, #222) !important;
+    text-decoration: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 1.55 !important;
+}
+.wc-sum-item a:hover { color: rgba(0,119,73,1) !important; }
+.wc-sum-meta {
+    font-size: 10.5px;
+    color: var(--color-text-tertiary, #bbb);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* Status badges */
+.wc-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 1px 6px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+.wc-status-pending    { background: rgba(255,152,0,0.15);  color: rgba(180,100,0,1); }
+.wc-status-active     { background: rgba(33,150,243,0.12); color: rgba(20,100,180,1); }
+.wc-status-rejected   { background: rgba(220,53,69,0.12);  color: rgba(180,30,50,1); }
+.wc-status-in_progress{ background: rgba(103,58,183,0.12); color: rgba(80,40,160,1); }
+.wc-status-resolved   { background: rgba(0,119,73,0.12);   color: rgba(0,100,60,1); }
+.wc-status-closed     { background: rgba(0,0,0,0.07);      color: rgba(80,80,80,1); }
+
+/* Meeting pill */
+.wc-sum-meeting {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+}
+.wc-sum-meeting-date {
+    flex-shrink: 0;
+    background: rgba(0,119,73,0.1);
+    color: rgba(0,100,60,1);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 7px;
+    border-radius: 4px;
+    min-width: 38px;
+    text-align: center;
+}
+.wc-sum-meeting a {
+    flex: 1;
+    font-size: 12.5px;
+    color: var(--color-text-primary, #222) !important;
+    text-decoration: none;
+    line-height: 1.55 !important;
+}
+.wc-sum-meeting a:hover { color: rgba(0,119,73,1) !important; }
+
+/* Submit button */
+.wc-sum-actions { margin-top: 10px; }
+.wc-sum-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 14px;
+    background: rgba(0,119,73,1);
+    color: #fff !important;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    text-decoration: none !important;
+    transition: background 0.15s;
+}
+.wc-sum-action-btn:hover { background: rgba(0,85,50,1) !important; }
+
+/* Dark theme summary */
+.bx-lucid .wc-sum-stat,
+html[data-theme="dark"] .wc-sum-stat {
+    background: rgba(255,255,255,0.04) !important;
+    border-color: rgba(255,255,255,0.08) !important;
+}
+.bx-lucid .wc-sum-stat-val,
+html[data-theme="dark"] .wc-sum-stat-val { color: #ddd !important; }
+.bx-lucid .wc-sum-item a,
+html[data-theme="dark"] .wc-sum-item a,
+.bx-lucid .wc-sum-meeting a,
+html[data-theme="dark"] .wc-sum-meeting a { color: #ccc !important; }
+.bx-lucid .wc-nav-panel,
+html[data-theme="dark"] .wc-nav-panel {
+    background: rgba(255,255,255,0.03) !important;
+    border-left-color: rgba(0,119,73,0.3) !important;
+    border-bottom-color: rgba(0,119,73,0.15) !important;
+}
+
+/* ── Collapsible sidebar ────────────────────────────────────── */
+.wc-sidebar { font-size: 13px; }
+.wc-sidebar-section { border-bottom: 1px solid rgba(0,0,0,0.05); }
+.wc-sidebar-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 12px 5px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.1s;
+}
+.wc-sidebar-section-header:hover { background: rgba(0,0,0,0.025); }
+.wc-sidebar-section-title {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-tertiary, #999);
+}
+.wc-sidebar-chevron {
+    font-size: 11px;
+    color: var(--color-text-tertiary, #bbb);
+    transition: transform 0.15s;
+}
+.wc-sidebar-section.wc-open .wc-sidebar-chevron { transform: rotate(180deg); }
+.wc-sidebar-items { overflow: hidden; max-height: 600px; transition: max-height 0.2s ease; }
+.wc-sidebar-section:not(.wc-open) .wc-sidebar-items { max-height: 0; }
+.wc-sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 12px 5px 18px;
+    font-size: 12.5px;
+    color: var(--color-text-secondary, #555);
+    text-decoration: none !important;
+    cursor: pointer;
+    transition: background 0.1s, color 0.1s;
+    line-height: 1.4;
+}
+.wc-sidebar-item:hover { background: rgba(0,0,0,0.03); color: var(--color-text-primary, #222) !important; }
+.wc-sidebar-item.wc-active { color: rgba(0,119,73,1) !important; background: rgba(0,119,73,0.06); font-weight: 500; }
+.wc-sidebar-item .sys-icon { font-size: 13px; flex-shrink: 0; }
+.wc-sidebar-item-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; background: rgba(0,119,73,0.4); }
+.wc-sidebar-item.wc-sub { padding-left: 26px; }
+.wc-sidebar-item.wc-sub .wc-sidebar-item-dot { background: rgba(58,123,213,0.5); }
+
+.bx-lucid .wc-sidebar-item.wc-active,
+html[data-theme="dark"] .wc-sidebar-item.wc-active { background: rgba(0,119,73,0.12) !important; color: #6ee7b7 !important; }
+.bx-lucid .wc-sidebar-section { border-bottom-color: rgba(255,255,255,0.06) !important; }
+
+/* ── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 600px) {
+    .wc-nav-strip { padding: 0 4px; }
+    .wc-nav-strip-btn { padding: 0 7px; font-size: 11px; }
+    .wc-nav-strip-label { display: none; }
+    .wc-sum-stats { gap: 5px; }
+    .wc-sum-stat { min-width: 60px; padding: 3px 8px 3px 7px; }
+    .wc-sum-stat-val { font-size: 15px; }
+}
