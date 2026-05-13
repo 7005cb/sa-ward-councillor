@@ -31,8 +31,8 @@ UPDATE `sys_menu_items` SET `submenu_object` = '' WHERE `module` = 'sa_ward_coun
 -- =====================================================
 -- LANGUAGE STRINGS CLEANUP
 -- =====================================================
-DELETE s FROM `sys_localization_strings` s
-JOIN `sys_localization_keys` k ON s.`IDKey` = k.`ID`
+DELETE `sys_localization_strings` FROM `sys_localization_strings`
+JOIN `sys_localization_keys` k ON `sys_localization_strings`.`IDKey` = k.`ID`
 WHERE k.`Key` LIKE '_sa_ward_councilor%';
 
 DELETE FROM `sys_localization_keys` WHERE `Key` LIKE '_sa_ward_councilor%';
