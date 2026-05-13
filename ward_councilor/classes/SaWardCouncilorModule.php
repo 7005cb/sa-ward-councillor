@@ -308,8 +308,8 @@ class SaWardCouncilorModule extends BxDolModule
         // Find custom levels by display name (may be stored as lang keys like _adm_prm_txt_level_name_1716021731)
         $aLevels = $oDb->getAll("SELECT ID, Name FROM sys_acl_levels WHERE ID > 8");
         $aStrings = array();
-        $aLocRows = $oDb->getAll("SELECT s.IDKey, s.`String` FROM sys_localization_strings s JOIN sys_localization_keys k ON k.ID = s.IDKey WHERE s.IDLanguage = (SELECT ID FROM sys_localization_languages WHERE Name = 'en' LIMIT 1) AND k.`Key` LIKE '_adm_prm_txt_level_name_%'");
-        foreach($aLocRows as $aLoc) { $aStrings[$aLoc['IDKey']] = $aLoc['String']; }
+        $aLocRows = $oDb->getAll("SELECT k.`Key`, s.`String` FROM sys_localization_strings s JOIN sys_localization_keys k ON k.ID = s.IDKey WHERE s.IDLanguage = (SELECT ID FROM sys_localization_languages WHERE Name = 'en' LIMIT 1) AND k.`Key` LIKE '_adm_prm_txt_level_name_%'");
+        foreach($aLocRows as $aLoc) { $aStrings[$aLoc['Key']] = $aLoc['String']; }
         foreach($aLevels as $aLevel) {
             $sName = isset($aStrings[$aLevel['Name']]) ? $aStrings[$aLevel['Name']] : $aLevel['Name'];
             $sLower = strtolower($sName);
