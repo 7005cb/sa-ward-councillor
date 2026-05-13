@@ -385,10 +385,22 @@ class SaWardCouncilorDb extends BxDolModuleDb
         if($aProfile)
             $sAuthorName = (string)$this->getOne("SELECT fullname FROM bx_persons_data WHERE id=" . (int)$aProfile['content_id'] . " LIMIT 1");
 
-        // Resolve actor role from ACL level at write time
+        // Resolve actor role from ACL level at write time — dynamic lookup by level name (handles lang keys)
         $iLevel = (int)$this->getOne("SELECT IDLevel FROM sys_acl_levels_members WHERE IDMember=" . (int)$iAuthorId . " LIMIT 1");
-        $aRoleMap = array(12 => 'councillor', 10 => 'leadership', 7 => 'moderator', 8 => 'admin', 3 => 'member');
-        $sActorRole = isset($aRoleMap[$iLevel]) ? $aRoleMap[$iLevel] : 'member';
+        $sActorRole = 'member';
+        if($iLevel > 0) {
+            $sLevelName = (string)$this->getOne("SELECT Name FROM sys_acl_levels WHERE ID=" . $iLevel . " LIMIT 1");
+            // Resolve lang-key names like _adm_prm_txt_level_name_1716021731 to actual display name
+            if(strpos($sLevelName, '_adm_prm_txt_level_name_') === 0) {
+                $sDisplay = (string)$this->getOne("SELECT `String` FROM sys_localization_strings WHERE IDKey='" . addslashes($sLevelName) . "' AND IDLanguage = (SELECT ID FROM sys_localization_languages WHERE Name = 'en' LIMIT 1) LIMIT 1");
+                if(!empty($sDisplay)) $sLevelName = $sDisplay;
+            }
+            $sLevelLower = strtolower($sLevelName);
+            if(strpos($sLevelLower, 'councillor') !== false) $sActorRole = 'councillor';
+            elseif(strpos($sLevelLower, 'leadership') !== false) $sActorRole = 'leadership';
+            elseif(strpos($sLevelLower, 'moderator') !== false) $sActorRole = 'moderator';
+            elseif(strpos($sLevelLower, 'admin') !== false) $sActorRole = 'admin';
+        }
 
         $sNote       = addslashes($sNote);
         $sAuthorName = addslashes($sAuthorName);

@@ -91,6 +91,8 @@ CREATE TABLE IF NOT EXISTS `sa_ward_councilor_notes` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `request_id` int(11) NOT NULL,
   `author_id` int(11) NOT NULL,
+  `author_name` varchar(255) DEFAULT NULL,
+  `actor_role` varchar(50) DEFAULT NULL,
   `note` text NOT NULL,
   `status_change` varchar(50) DEFAULT NULL,
   `created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -298,31 +300,36 @@ VALUES
   ('sa_ward_councilor', 'delete any entry', NULL, '_acl_txt_sa_ward_councilor_delete_any_entry', '', 0, ''),
   ('sa_ward_councilor', 'approve entry',   NULL, '_acl_txt_sa_ward_councilor_approve_entry',   '', 0, '');
 
--- Grant Standard members (level 3) basic content rights
+-- Grant Standard members basic content rights
 INSERT INTO `sys_acl_matrix` (`IDLevel`, `IDAction`)
-SELECT 3, `ID` FROM `sys_acl_actions`
-WHERE `Module` = 'sa_ward_councilor'
-AND `Name` IN ('view entry', 'create entry', 'edit own entry', 'delete own entry');
+SELECT l.ID, a.ID FROM sys_acl_levels l, sys_acl_actions a
+WHERE a.Module = 'sa_ward_councilor'
+AND a.Name IN ('view entry', 'create entry', 'edit own entry', 'delete own entry')
+AND l.Name IN ('Standard', '_adm_prm_txt_level_standard');
 
--- Grant Moderators (level 5) full content rights
+-- Grant Moderators full content rights
 INSERT INTO `sys_acl_matrix` (`IDLevel`, `IDAction`)
-SELECT 5, `ID` FROM `sys_acl_actions`
-WHERE `Module` = 'sa_ward_councilor';
+SELECT l.ID, a.ID FROM sys_acl_levels l, sys_acl_actions a
+WHERE a.Module = 'sa_ward_councilor'
+AND l.Name IN ('Moderator', '_adm_prm_txt_level_moderator');
 
--- Grant Administrators (level 8) full content rights
+-- Grant Administrators full content rights
 INSERT INTO `sys_acl_matrix` (`IDLevel`, `IDAction`)
-SELECT 8, `ID` FROM `sys_acl_actions`
-WHERE `Module` = 'sa_ward_councilor';
+SELECT l.ID, a.ID FROM sys_acl_levels l, sys_acl_actions a
+WHERE a.Module = 'sa_ward_councilor'
+AND l.Name IN ('Administrator', '_adm_prm_txt_level_administrator');
 
--- Grant Councillor (level 12) full content rights
+-- Grant Councillors full content rights
 INSERT INTO `sys_acl_matrix` (`IDLevel`, `IDAction`)
-SELECT 12, `ID` FROM `sys_acl_actions`
-WHERE `Module` = 'sa_ward_councilor';
+SELECT l.ID, a.ID FROM sys_acl_levels l, sys_acl_actions a
+WHERE a.Module = 'sa_ward_councilor'
+AND l.Name LIKE '%Councillor%';
 
--- Grant Leadership (level 10) full content rights
+-- Grant Leadership full content rights
 INSERT INTO `sys_acl_matrix` (`IDLevel`, `IDAction`)
-SELECT 10, `ID` FROM `sys_acl_actions`
-WHERE `Module` = 'sa_ward_councilor';
+SELECT l.ID, a.ID FROM sys_acl_levels l, sys_acl_actions a
+WHERE a.Module = 'sa_ward_councilor'
+AND l.Name LIKE '%Leadership%';
 -- ────────────────────────────────────────────────────────────────────────────
 
 -- ─── Timeline: Register content info object ─────────────────────────────────

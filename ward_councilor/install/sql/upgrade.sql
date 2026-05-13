@@ -144,23 +144,36 @@ INSERT IGNORE INTO `sys_acl_actions`
 VALUES
   ('sa_ward_councilor', 'approve entry', NULL, '_acl_txt_sa_ward_councilor_approve_entry', '', 0, '');
 
--- Grant approve entry to Moderators (5), Administrators (8), Leadership (10), Councillor (12)
+-- Grant approve entry to moderation roles (dynamic name lookup)
 INSERT IGNORE INTO `sys_acl_matrix` (`IDLevel`, `IDAction`)
-SELECT 5, `ID` FROM `sys_acl_actions`
-WHERE `Module` = 'sa_ward_councilor' AND `Name` = 'approve entry';
+SELECT l.ID, a.ID FROM sys_acl_levels l, sys_acl_actions a
+WHERE a.Module = 'sa_ward_councilor' AND a.Name = 'approve entry'
+AND l.Name IN ('Moderator', '_adm_prm_txt_level_moderator');
 
 INSERT IGNORE INTO `sys_acl_matrix` (`IDLevel`, `IDAction`)
-SELECT 8, `ID` FROM `sys_acl_actions`
-WHERE `Module` = 'sa_ward_councilor' AND `Name` = 'approve entry';
+SELECT l.ID, a.ID FROM sys_acl_levels l, sys_acl_actions a
+WHERE a.Module = 'sa_ward_councilor' AND a.Name = 'approve entry'
+AND l.Name IN ('Administrator', '_adm_prm_txt_level_administrator');
 
 INSERT IGNORE INTO `sys_acl_matrix` (`IDLevel`, `IDAction`)
-SELECT 10, `ID` FROM `sys_acl_actions`
-WHERE `Module` = 'sa_ward_councilor' AND `Name` = 'approve entry';
+SELECT l.ID, a.ID FROM sys_acl_levels l, sys_acl_actions a
+WHERE a.Module = 'sa_ward_councilor' AND a.Name = 'approve entry'
+AND l.Name LIKE '%Leadership%';
 
 INSERT IGNORE INTO `sys_acl_matrix` (`IDLevel`, `IDAction`)
-SELECT 12, `ID` FROM `sys_acl_actions`
-WHERE `Module` = 'sa_ward_councilor' AND `Name` = 'approve entry';
+SELECT l.ID, a.ID FROM sys_acl_levels l, sys_acl_actions a
+WHERE a.Module = 'sa_ward_councilor' AND a.Name = 'approve entry'
+AND l.Name LIKE '%Councillor%';
 
 -- ─── Upgrade: add active + rejected to requests status ENUM ──────
 ALTER TABLE `sa_ward_councilor_requests`
   MODIFY COLUMN `status` enum('pending','active','rejected','in_progress','resolved','closed') NOT NULL DEFAULT 'pending';
+
+-- ─── Upgrade: add missing allow_view_to column to requests table ──
+ALTER TABLE `sa_ward_councilor_requests`
+  ADD COLUMN IF NOT EXISTS `allow_view_to` int(11) NOT NULL DEFAULT '2' AFTER `space_id`;
+
+-- ─── Upgrade: add missing columns to notes table ─────────────────
+ALTER TABLE `sa_ward_councilor_notes`
+  ADD COLUMN IF NOT EXISTS `author_name` varchar(255) DEFAULT NULL AFTER `author_id`,
+  ADD COLUMN IF NOT EXISTS `actor_role` varchar(50) DEFAULT NULL AFTER `author_name`;

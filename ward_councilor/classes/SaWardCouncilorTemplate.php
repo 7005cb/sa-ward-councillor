@@ -223,6 +223,16 @@ class SaWardCouncilorTemplate extends BxDolModuleTemplate
         $iLevel = (int)$oDb->getOne(
             $oDb->prepare("SELECT IDLevel FROM sys_acl_levels_members WHERE IDMember=? LIMIT 1", $iPersonPid)
         );
-        return in_array($iLevel, array(7, 8, 10, 12));
+        if($iLevel <= 0) return false;
+        // Dynamic: check level name instead of hardcoded IDs
+        $sLevelName = (string)$oDb->getOne("SELECT Name FROM sys_acl_levels WHERE ID=" . $iLevel . " LIMIT 1");
+        // Resolve lang-key names like _adm_prm_txt_level_name_1716021731 to actual display name
+        if(strpos($sLevelName, '_adm_prm_txt_level_name_') === 0) {
+            $sDisplay = (string)$oDb->getOne("SELECT `String` FROM sys_localization_strings WHERE IDKey='" . addslashes($sLevelName) . "' AND IDLanguage = (SELECT ID FROM sys_localization_languages WHERE Name = 'en' LIMIT 1) LIMIT 1");
+            if(!empty($sDisplay)) $sLevelName = $sDisplay;
+        }
+        $sLower = strtolower($sLevelName);
+        return (strpos($sLower, 'councillor') !== false || strpos($sLower, 'leadership') !== false
+            || strpos($sLower, 'moderator') !== false || strpos($sLower, 'admin') !== false);
     }
 }

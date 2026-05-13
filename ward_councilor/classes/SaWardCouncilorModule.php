@@ -290,40 +290,60 @@ class SaWardCouncilorModule extends BxDolModule
         return 0;
     }
 
+    /**
+     * Resolve ACL level IDs for moderation-capable roles.
+     * Standard levels 7 (Moderator) and 8 (Administrator) are always included.
+     * Custom levels (Leadership, Councillor) are found by matching display name
+     * in sys_acl_levels.Name or sys_localization_strings.String (for lang-key names).
+     * Result cached in static variable for request lifetime.
+     * @return array Integer level IDs
+     */
+    private static $_aModLevelIds = null;
+    protected function _getModeratorLevelIds()
+    {
+        if(self::$_aModLevelIds !== null)
+            return self::$_aModLevelIds;
+        $oDb = BxDolDb::getInstance();
+        $aIds = array(7, 8); // Moderator, Administrator — always standard
+        // Find custom levels by display name (may be stored as lang keys like _adm_prm_txt_level_name_1716021731)
+        $aLevels = $oDb->getAll("SELECT ID, Name FROM sys_acl_levels WHERE ID > 8");
+        $aStrings = array();
+        $aLocRows = $oDb->getAll("SELECT s.IDKey, s.`String` FROM sys_localization_strings s JOIN sys_localization_keys k ON k.ID = s.IDKey WHERE s.IDLanguage = (SELECT ID FROM sys_localization_languages WHERE Name = 'en' LIMIT 1) AND k.`Key` LIKE '_adm_prm_txt_level_name_%'");
+        foreach($aLocRows as $aLoc) { $aStrings[$aLoc['IDKey']] = $aLoc['String']; }
+        foreach($aLevels as $aLevel) {
+            $sName = isset($aStrings[$aLevel['Name']]) ? $aStrings[$aLevel['Name']] : $aLevel['Name'];
+            $sLower = strtolower($sName);
+            if(strpos($sLower, 'councillor') !== false || strpos($sLower, 'leadership') !== false)
+                $aIds[] = (int)$aLevel['ID'];
+        }
+        self::$_aModLevelIds = array_unique($aIds);
+        return self::$_aModLevelIds;
+    }
+
     protected function _isCouncilor()
     {
         if(!isLogged()) return false;
-
-        // isMemberLevelInSet uses current context profile which may be a space/channel.
-        // Get the person profile for this account and check its level directly.
-        $iAccountId = getLoggedId(); // account ID
+        $iAccountId = getLoggedId();
         $oDb = BxDolDb::getInstance();
-
-        // Get the bx_persons profile for this account
         $iPersonProfileId = (int)$oDb->getOne(
             $oDb->prepare("SELECT `id` FROM `sys_profiles` WHERE `account_id`=? AND `type`='bx_persons' AND `status`='active' LIMIT 1", $iAccountId)
         );
-
         if($iPersonProfileId) {
             $iLevel = (int)$oDb->getOne(
                 $oDb->prepare("SELECT `IDLevel` FROM `sys_acl_levels_members` WHERE `IDMember`=? LIMIT 1", $iPersonProfileId)
             );
-            // Administrator(8), Moderator(7), Leadership(10), Councillor(12)
-            if(in_array($iLevel, array(7, 8, 10, 12))) return true;
+            $aModLevels = $this->_getModeratorLevelIds();
+            if($iLevel > 0 && in_array($iLevel, $aModLevels)) return true;
         }
-
         // Fallback: space admin
         if(!BxDolModuleQuery::getInstance()->isModuleInstalled('bx_spaces')) return false;
-
         $iProfileId = (int)bx_get_logged_profile_id();
         $iSpaceId   = (int)$this->_getCurrentSpaceId();
-
         if(!$iSpaceId)
             return (bool)$oDb->getOne($oDb->prepare(
                 "SELECT `id` FROM `bx_spaces_admins` WHERE `fan_id`=? AND (`expired`=0 OR `expired`>UNIX_TIMESTAMP()) LIMIT 1",
                 $iProfileId
             ));
-
         return (bool)$oDb->getOne($oDb->prepare(
             "SELECT `id` FROM `bx_spaces_admins` WHERE `group_profile_id`=? AND `fan_id`=? AND (`expired`=0 OR `expired`>UNIX_TIMESTAMP()) LIMIT 1",
             $iSpaceId, $iProfileId
@@ -503,8 +523,10 @@ class SaWardCouncilorModule extends BxDolModule
                 $iAuthorProfileId = bx_get_logged_profile_id();
                 $aFresh = $this->_oDb->getServiceRequest($iRequestId);
                 $iOwnerId = !empty($aFresh['space_id']) ? (int)$aFresh['space_id'] : $iAuthorProfileId;
-                $oAlert = new BxDolAlerts('sa_ward_councilor', 'edited', $iRequestId, $iAuthorProfileId, array('owner_id' => $iOwnerId));
-                $oAlert->alert();
+                try {
+                    $oAlert = new BxDolAlerts('sa_ward_councilor', 'edited', $iRequestId, $iAuthorProfileId, array('owner_id' => $iOwnerId));
+                    $oAlert->alert();
+                } catch(Exception $e) {}
 
                 // Migrate legacy councilor_notes on first update
                 $aFresh = $this->_oDb->getServiceRequest($iRequestId);
@@ -659,12 +681,16 @@ class SaWardCouncilorModule extends BxDolModule
                 if($iRequestId) {
                     $iAuthorProfileId = bx_get_logged_profile_id();
                     $iOwnerId = !empty($aData['space_id']) ? (int)$aData['space_id'] : $iAuthorProfileId;
-                    $oAlert = new BxDolAlerts('sa_ward_councilor', 'added', $iRequestId, $iAuthorProfileId, array(
-                        'owner_id' => $iOwnerId,
-                        'object_author_id' => $iAuthorProfileId,
-                        'privacy_view' => (int)($aData['allow_view_to'] ? $aData['allow_view_to'] : BX_DOL_PG_ALL),
-                    ));
-                    $oAlert->alert();
+                    try {
+                        if(class_exists('BxDolAlerts')) {
+                            $oAlert = new BxDolAlerts('sa_ward_councilor', 'added', $iRequestId, $iAuthorProfileId, array(
+                                'owner_id' => $iOwnerId,
+                                'object_author_id' => $iAuthorProfileId,
+                                'privacy_view' => (int)($aData['allow_view_to'] ? $aData['allow_view_to'] : BX_DOL_PG_ALL),
+                            ));
+                            $oAlert->alert();
+                        }
+                    } catch(Exception $e) {}
                     header('Location: ' . BX_DOL_URL_ROOT . 'page.php?i=view-ward-request&id=' . $iRequestId);
                     exit;
                 } else {
@@ -906,12 +932,14 @@ class SaWardCouncilorModule extends BxDolModule
                 if($iMeetingId) {
                     $iAuthorProfileId = bx_get_logged_profile_id();
                     $iOwnerId = !empty($aData['space_id']) ? (int)$aData['space_id'] : $iAuthorProfileId;
-                    $oAlert = new BxDolAlerts('sa_ward_councilor', 'added', $iMeetingId, $iAuthorProfileId, array(
-                        'owner_id' => $iOwnerId,
-                        'object_author_id' => $iAuthorProfileId,
-                        'privacy_view' => BX_DOL_PG_ALL,
-                    ));
-                    $oAlert->alert();
+                    try {
+                        $oAlert = new BxDolAlerts('sa_ward_councilor', 'added', $iMeetingId, $iAuthorProfileId, array(
+                            'owner_id' => $iOwnerId,
+                            'object_author_id' => $iAuthorProfileId,
+                            'privacy_view' => BX_DOL_PG_ALL,
+                        ));
+                        $oAlert->alert();
+                    } catch(Exception $e) {}
                     $sMessage = '<div class="wc-success">✅ Meeting scheduled successfully!</div>';
                 } else {
                     $sMessage = '<div class="wc-error">Error scheduling meeting. Please try again.</div>';
@@ -1123,12 +1151,14 @@ class SaWardCouncilorModule extends BxDolModule
                 if($iAnnId) {
                     $iAuthorProfileId = bx_get_logged_profile_id();
                     $iOwnerId = !empty($aData['space_id']) ? (int)$aData['space_id'] : $iAuthorProfileId;
-                    $oAlert = new BxDolAlerts('sa_ward_councilor', 'added', $iAnnId, $iAuthorProfileId, array(
-                        'owner_id' => $iOwnerId,
-                        'object_author_id' => $iAuthorProfileId,
-                        'privacy_view' => BX_DOL_PG_ALL,
-                    ));
-                    $oAlert->alert();
+                    try {
+                        $oAlert = new BxDolAlerts('sa_ward_councilor', 'added', $iAnnId, $iAuthorProfileId, array(
+                            'owner_id' => $iOwnerId,
+                            'object_author_id' => $iAuthorProfileId,
+                            'privacy_view' => BX_DOL_PG_ALL,
+                        ));
+                        $oAlert->alert();
+                    } catch(Exception $e) {}
                     header('Location: ' . BX_DOL_URL_ROOT . 'page.php?i=view-ward-announcement&id=' . $iAnnId);
                     exit;
                 } else {
@@ -1641,7 +1671,7 @@ class SaWardCouncilorModule extends BxDolModule
         $iProfileId = bx_get_logged_profile_id();
 
         // Councillor, Leadership, Moderator, Admin can edit any
-        if (BxDolAcl::getInstance()->isMemberLevelInSet(array(7, 8, 10, 12)))
+        if (BxDolAcl::getInstance()->isMemberLevelInSet($this->_getModeratorLevelIds()))
             return true;
 
         if (BxDolAcl::getInstance()->isMemberLevelInSet('edit own entry')
@@ -1656,7 +1686,7 @@ class SaWardCouncilorModule extends BxDolModule
         $aEntry = $this->_oDb->getServiceRequest($iEntryId);
         $iProfileId = bx_get_logged_profile_id();
 
-        if (BxDolAcl::getInstance()->isMemberLevelInSet(array(7, 8, 10, 12)))
+        if (BxDolAcl::getInstance()->isMemberLevelInSet($this->_getModeratorLevelIds()))
             return true;
 
         if (BxDolAcl::getInstance()->isMemberLevelInSet('delete own entry')
