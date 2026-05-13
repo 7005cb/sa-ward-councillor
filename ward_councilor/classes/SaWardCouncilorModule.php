@@ -336,7 +336,7 @@ class SaWardCouncilorModule extends BxDolModule
             if($iLevel > 0 && in_array($iLevel, $aModLevels)) return true;
         }
         // Fallback: space admin
-        if(!BxDolModuleQuery::getInstance()->isModuleInstalled('bx_spaces')) return false;
+        // bx_spaces required — skip check, always installed on this platform
         $iProfileId = (int)bx_get_logged_profile_id();
         $iSpaceId   = (int)$this->_getCurrentSpaceId();
         if(!$iSpaceId)
