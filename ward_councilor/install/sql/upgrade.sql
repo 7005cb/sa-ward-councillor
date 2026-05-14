@@ -177,3 +177,61 @@ ALTER TABLE `sa_ward_councilor_requests`
 ALTER TABLE `sa_ward_councilor_notes`
   ADD COLUMN IF NOT EXISTS `author_name` varchar(255) DEFAULT NULL AFTER `author_id`,
   ADD COLUMN IF NOT EXISTS `actor_role` varchar(50) DEFAULT NULL AFTER `author_name`;
+
+-- ─── Upgrade: add space page blocks (summary, nav_strip, sidebar) ──
+INSERT IGNORE INTO `sys_pages_blocks`
+    (`object`, `cell_id`, `module`,
+     `title_system`, `title`,
+     `designbox_id`, `class`, `submenu`, `tabs`, `async`,
+     `visible_for_levels`, `hidden_on`,
+     `type`, `content`,
+     `content_empty`, `text`, `text_updated`, `help`,
+     `cache_lifetime`, `config_api`,
+     `deletable`, `copyable`, `active`, `active_api`, `order`)
+VALUES
+    ('bx_spaces_view_profile', 0, 'sa_ward_councilor',
+     '', '_sa_ward_councilor_block_space_summary',
+     13, '', '', 0, 0,
+     2147483647, '',
+     'service', 'a:2:{s:6:\"module\";s:17:\"sa_ward_councilor\";s:6:\"method\";s:24:\"get_space_summary_block\";}',
+     '', '', 0, '',
+     0, '',
+     0, 1, 1, 0, 1);
+
+INSERT IGNORE INTO `sys_pages_blocks`
+    (`object`, `cell_id`, `module`,
+     `title_system`, `title`,
+     `designbox_id`, `class`, `submenu`, `tabs`, `async`,
+     `visible_for_levels`, `hidden_on`,
+     `type`, `content`,
+     `content_empty`, `text`, `text_updated`, `help`,
+     `cache_lifetime`, `config_api`,
+     `deletable`, `copyable`, `active`, `active_api`, `order`)
+VALUES
+    ('bx_spaces_view_profile', 0, 'sa_ward_councilor',
+     '', '_sa_ward_councilor_block_nav_strip',
+     13, '', '', 0, 0,
+     2147483647, '',
+     'service', 'a:2:{s:6:\"module\";s:17:\"sa_ward_councilor\";s:6:\"method\";s:18:\"get_ward_nav_strip\";}',
+     '', '', 0, '',
+     0, '',
+     0, 1, 1, 0, 2);
+
+INSERT IGNORE INTO `sys_pages_blocks`
+    (`object`, `cell_id`, `module`,
+     `title_system`, `title`,
+     `designbox_id`, `class`, `submenu`, `tabs`, `async`,
+     `visible_for_levels`, `hidden_on`,
+     `type`, `content`,
+     `content_empty`, `text`, `text_updated`, `help`,
+     `cache_lifetime`, `config_api`,
+     `deletable`, `copyable`, `active`, `active_api`, `order`)
+VALUES
+    ('bx_spaces_view_profile', 0, 'sa_ward_councilor',
+     '', '_sa_ward_councilor_block_sidebar',
+     13, '', '', 0, 0,
+     2147483647, '',
+     'service', 'a:2:{s:6:\"module\";s:17:\"sa_ward_councilor\";s:6:\"method\";s:17:\"get_sidebar_block\";}',
+     '', '', 0, '',
+     0, '',
+     0, 1, 1, 0, 3);

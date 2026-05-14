@@ -227,6 +227,66 @@ INSERT INTO `sys_pages_blocks` (`object`, `cell_id`, `module`, `title_system`, `
 INSERT INTO `sys_pages_blocks` (`object`, `cell_id`, `module`, `title_system`, `title`, `designbox_id`, `class`, `submenu`, `tabs`, `async`, `visible_for_levels`, `hidden_on`, `type`, `content`, `content_empty`, `text`, `text_updated`, `help`, `cache_lifetime`, `config_api`, `deletable`, `copyable`, `active`, `active_api`, `order`) VALUES
 ('sa_ward_councilor_manage', 1, 'sa_ward_councilor', '', '_sa_ward_councilor_block_manage', 11, '', '', 0, 0, 2147483647, '', 'service', 'a:2:{s:6:"module";s:17:"sa_ward_councilor";s:6:"method";s:16:"get_manage_block";}', '', '', 0, '', 0, '', 0, 1, 1, 0, 1);
 
+-- Space Summary block (inline on Space page)
+INSERT INTO `sys_pages_blocks`
+    (`object`, `cell_id`, `module`,
+     `title_system`, `title`,
+     `designbox_id`, `class`, `submenu`, `tabs`, `async`,
+     `visible_for_levels`, `hidden_on`,
+     `type`, `content`,
+     `content_empty`, `text`, `text_updated`, `help`,
+     `cache_lifetime`, `config_api`,
+     `deletable`, `copyable`, `active`, `active_api`, `order`)
+VALUES
+    ('bx_spaces_view_profile', 0, 'sa_ward_councilor',
+     '', '_sa_ward_councilor_block_space_summary',
+     13, '', '', 0, 0,
+     2147483647, '',
+     'service', 'a:2:{s:6:"module";s:17:"sa_ward_councilor";s:6:"method";s:24:"get_space_summary_block";}',
+     '', '', 0, '',
+     0, '',
+     0, 1, 1, 0, 1);
+
+-- Ward Navigation Strip block (inline on Space page)
+INSERT INTO `sys_pages_blocks`
+    (`object`, `cell_id`, `module`,
+     `title_system`, `title`,
+     `designbox_id`, `class`, `submenu`, `tabs`, `async`,
+     `visible_for_levels`, `hidden_on`,
+     `type`, `content`,
+     `content_empty`, `text`, `text_updated`, `help`,
+     `cache_lifetime`, `config_api`,
+     `deletable`, `copyable`, `active`, `active_api`, `order`)
+VALUES
+    ('bx_spaces_view_profile', 0, 'sa_ward_councilor',
+     '', '_sa_ward_councilor_block_nav_strip',
+     13, '', '', 0, 0,
+     2147483647, '',
+     'service', 'a:2:{s:6:"module";s:17:"sa_ward_councilor";s:6:"method";s:18:"get_ward_nav_strip";}',
+     '', '', 0, '',
+     0, '',
+     0, 1, 1, 0, 2);
+
+-- Ward Sidebar block (inline on Space page)
+INSERT INTO `sys_pages_blocks`
+    (`object`, `cell_id`, `module`,
+     `title_system`, `title`,
+     `designbox_id`, `class`, `submenu`, `tabs`, `async`,
+     `visible_for_levels`, `hidden_on`,
+     `type`, `content`,
+     `content_empty`, `text`, `text_updated`, `help`,
+     `cache_lifetime`, `config_api`,
+     `deletable`, `copyable`, `active`, `active_api`, `order`)
+VALUES
+    ('bx_spaces_view_profile', 0, 'sa_ward_councilor',
+     '', '_sa_ward_councilor_block_sidebar',
+     13, '', '', 0, 0,
+     2147483647, '',
+     'service', 'a:2:{s:6:"module";s:17:"sa_ward_councilor";s:6:"method";s:17:"get_sidebar_block";}',
+     '', '', 0, '',
+     0, '',
+     0, 1, 1, 0, 3);
+
 -- =====================================================
 -- MENU ITEMS
 -- =====================================================
