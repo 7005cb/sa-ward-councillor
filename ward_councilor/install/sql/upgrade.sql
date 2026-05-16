@@ -235,3 +235,10 @@ VALUES
      '', '', 0, '',
      0, '',
      0, 1, 1, 0, 3);
+
+-- ─── Upgrade: fix menu visible_for_levels ────────────────────────
+UPDATE `sys_menu_items` SET `visible_for_levels` = 2752
+WHERE `module` = 'sa_ward_councilor' AND `name` = 'ward-manage';
+
+UPDATE `sys_menu_items` SET `visible_for_levels` = 2147483644
+WHERE `module` = 'sa_ward_councilor' AND `name` = 'ward-my-requests';

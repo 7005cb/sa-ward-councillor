@@ -1,0 +1,94 @@
+body .sar-wrap{padding:20px;font-family:sans-serif;color:#333}
+/* ── Filters ── */
+body .sar-filters form{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;align-items:center}
+body .sar-filters select{padding:8px 12px;border:1px solid #999;border-radius:4px;background:#fff!important;color:#333!important;font-size:14px}
+body .sar-filters input[type=text],.sar-filters input[type=number]{padding:8px 12px;border:1px solid #999;border-radius:4px;background:#fff!important;color:#333!important;font-size:14px}
+body .sar-filters button,.sar-btn-primary{display:inline-block;padding:10px 20px;background:#007a4d;color:#fff!important;border-radius:4px;text-decoration:none;border:none;cursor:pointer;font-size:14px;font-weight:600}
+body .sar-filters button:hover,.sar-btn-primary:hover{background:#005c3a;color:#fff!important}
+body .sar-cta{margin-bottom:20px}
+/* ── Grid ── */
+body .sar-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
+body .sar-card{border:1px solid #ccc;border-radius:8px;padding:16px;background:#fff;color:#333!important}
+body .sar-card-badge{display:inline-block;background:#007a4d;color:#fff!important;font-size:11px;padding:3px 10px;border-radius:12px;text-transform:uppercase;margin-bottom:8px;font-weight:600}
+body .sar-card h3{margin:0 0 6px;font-size:16px}
+body .sar-card h3 a{color:#1a1a1a!important;text-decoration:none;font-weight:600}
+body .sar-card h3 a:hover{color:#007a4d!important}
+body .sar-card-location{color:#444!important;font-size:13px;margin-bottom:6px}
+body .sar-card-price{font-weight:700;color:#007a4d!important;font-size:16px;margin-bottom:8px}
+body .sar-card-meta{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:#555!important;margin-top:6px}
+body .sar-card-meta span{background:#f0f0f0;color:#333!important;padding:2px 8px;border-radius:10px}
+body .sar-card-avail{font-size:12px;color:#007a4d!important;font-weight:600;margin-top:6px}
+/* ── Detail Page ── */
+body .sar-detail{max-width:860px;padding:20px;color:#333!important}
+body .sar-detail h1{margin-bottom:10px;color:#1a1a1a!important}
+body .sar-meta{display:flex;gap:15px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+body .sar-price{font-size:22px;font-weight:700;color:#007a4d!important}
+body .sar-location{color:#444!important;margin-bottom:16px;font-size:15px}
+body .sar-desc{line-height:1.8;margin-bottom:20px;color:#333!important}
+body .sar-specs{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:20px}
+body .sar-spec-item{background:#f5f5f5;border-radius:6px;padding:10px 14px;font-size:13px;color:#333!important}
+body .sar-spec-item strong{display:block;color:#007a4d!important;font-size:11px;text-transform:uppercase;margin-bottom:2px}
+body .sar-contact{background:#f0f8f4;border-left:4px solid #007a4d;padding:14px 18px;border-radius:4px;margin-bottom:20px;color:#333!important}
+body .sar-contact h3{color:#1a1a1a!important;margin-top:0}
+body .sar-contact a{color:#007a4d!important}
+body .sar-back{color:#007a4d!important;text-decoration:none;font-weight:600}
+/* ── Media Gallery ── */
+body .sar-gallery{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+body .sar-gallery img,.sar-gallery video{max-width:280px;max-height:200px;border-radius:6px;border:1px solid #ccc;object-fit:cover}
+/* ── Form ── */
+body .sar-form-wrap{max-width:640px}
+body .sar-form label{display:flex;flex-direction:column;gap:5px;margin-bottom:16px;font-weight:600;font-size:14px;color:#333!important}
+body .sar-form input,.sar-form select,.sar-form textarea{padding:9px 12px;border:1px solid #999;border-radius:4px;font-size:14px;background:#fff!important;color:#333!important;width:100%;box-sizing:border-box}
+body .sar-form input:focus,.sar-form select:focus,.sar-form textarea:focus{border-color:#007a4d;outline:none}
+body .sar-form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+body .sar-form-section{margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid #e0e0e0}
+body .sar-form-section h3{color:#007a4d!important;font-size:14px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px}
+body .sar-checkbox-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+body .sar-checkbox-row input[type=checkbox]{width:auto;margin:0}
+body .sar-checkbox-row label{margin:0;font-weight:400;color:#333!important}
+body .sar-error{background:#fde8e8;color:#a00!important;padding:12px;border-radius:4px;margin-bottom:16px;border:1px solid #f5c0c0}
+body .sar-success{background:#e8f8ee;color:#155724!important;padding:12px;border-radius:4px;margin-bottom:16px;border:1px solid #b8dfc8}
+/* ── My Listings ── */
+body .sar-my-listings{display:flex;flex-direction:column;gap:16px}
+body .sar-status{font-size:11px;padding:3px 10px;border-radius:12px;font-weight:600}
+body .sar-status-active{background:#d4edda;color:#155724!important}
+body .sar-status-inactive{background:#f8d7da;color:#721c24!important}
+body .sar-status-draft{background:#fff3cd;color:#856404!important}
+body .sar-owner-actions{display:flex;gap:10px;align-items:center;margin-top:8px}
+/* ── Empty State ── */
+body .sar-empty{text-align:center;padding:48px 20px;background:#f5f5f5;border-radius:8px;border:1px solid #e0e0e0}
+body .sar-empty p{color:#444!important;margin-bottom:16px;font-size:15px}
+/* ── Featured badge ── */
+body .sar-featured{background:#f0a500;color:#fff!important;font-size:11px;padding:3px 10px;border-radius:12px;font-weight:600;margin-left:6px}
+/* ── Group tag ── */
+body .sar-group-tag{font-size:12px;color:#007a4d!important;background:#e8f8ee;padding:3px 10px;border-radius:12px;display:inline-block;margin-bottom:8px}
+
+/* ── Phase 2 contrast fix — create form page ── */
+.sar-form-wrap,
+.sar-form-wrap *,
+.sar-form label,
+body .sar-form h3 {
+    color: #1a1a1a !important;
+}
+.sar-form input,
+.sar-form select,
+body .sar-form textarea {
+    background: #ffffff !important;
+    color: #1a1a1a !important;
+    border: 1px solid #888 !important;
+}
+body .sar-form-section {
+    background: #f9f9f9 !important;
+    padding: 16px !important;
+    border-radius: 6px !important;
+    margin-bottom: 20px !important;
+    border: 1px solid #e0e0e0 !important;
+}
+body .sar-form-section h3 {
+    color: #007a4d !important;
+    background: transparent !important;
+}
+body .sar-checkbox-row label {
+    color: #1a1a1a !important;
+    background: transparent !important;
+}

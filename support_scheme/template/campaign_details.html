@@ -1,0 +1,49 @@
+<div class="sa-support-scheme-campaign">
+    <div class="sa-support-scheme-campaign-header">
+        <h1 class="sa-support-scheme-campaign-title">__title__</h1>
+        <span class="sa-support-scheme-category sa-support-scheme-category-__category__">__category__</span>
+    </div>
+    
+    <div class="sa-support-scheme-campaign-body">
+        <div class="sa-support-scheme-campaign-main">
+            <div class="sa-support-scheme-campaign-image">
+                <img src="__image__" alt="__title__" onerror="this.style.display='none'">
+            </div>
+            
+            <div class="sa-support-scheme-progress-container">
+                <div class="sa-support-scheme-progress-info">
+                    <span class="sa-support-scheme-current">R __current_amount__</span>
+                    <span class="sa-support-scheme-goal">of R __goal_amount__ goal</span>
+                </div>
+                <div class="sa-support-scheme-progress">
+                    <div class="sa-support-scheme-progress-bar" style="width: __progress__%"></div>
+                </div>
+                <div class="sa-support-scheme-progress-details">
+                    <span>__progress__% funded</span>
+                    <span>__donations_count__ donations</span>
+                    <span>__views__ views</span>
+                </div>
+            </div>
+            
+            <div class="sa-support-scheme-description">
+                <h3>About this Campaign</h3>
+                __description__
+            </div>
+            
+            <bx_if:show_beneficiary>
+                <div class="sa-support-scheme-beneficiary">
+                    <h3>Beneficiary</h3>
+                    <h4>__beneficiary_name__</h4>
+                    <p>__beneficiary_story__</p>
+                </div>
+            </bx_if:show_beneficiary>
+        </div>
+        
+        <div class="sa-support-scheme-campaign-sidebar">
+            <div class="sa-support-scheme-donations-list">
+                <h3>Recent Donations</h3>
+                __donations__
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,837 @@
+/* =====================================================
+   COMMUNITY SUPPORT SCHEME - South African Theme v2.0
+   ===================================================== */
+
+/* Variables */
+:root {
+    --sa-primary: #e74c3c;
+    --sa-secondary: #27ae60;
+    --sa-accent: #f39c12;
+    --sa-dark: #2c3e50;
+    --sa-light: #f8f9fa;
+    --sa-text: #333333;
+    --sa-text-light: #666666;
+    --sa-border: #e0e0e0;
+    --sa-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    --sa-shadow-hover: 0 8px 25px rgba(0,0,0,0.15);
+    --sa-radius: 12px;
+    --sa-radius-sm: 8px;
+}
+
+/* Main Container */
+.sa-support-scheme {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Stats Banner */
+.sa-stats-banner {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 20px;
+    padding: 30px;
+    background: linear-gradient(135deg, var(--sa-primary), #c0392b);
+    border-radius: var(--sa-radius);
+    margin-bottom: 25px;
+    color: white;
+}
+
+.sa-stats-banner .sa-stat {
+    text-align: center;
+}
+
+.sa-stats-banner .sa-stat-value {
+    display: block;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.sa-stats-banner .sa-stat-label {
+    font-size: 13px;
+    opacity: 0.9;
+}
+
+/* Space Context Indicator */
+.sa-space-context {
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    color: #856404;
+    padding: 10px 15px;
+    border-radius: var(--sa-radius-sm);
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+/* Header */
+.sa-campaigns-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.sa-campaigns-header h2 {
+    font-size: 26px;
+    color: var(--sa-dark);
+    margin: 0;
+}
+
+/* Category Filter Tabs */
+.sa-category-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.sa-tab {
+    padding: 8px 16px;
+    background: white;
+    border: 2px solid var(--sa-border);
+    border-radius: 20px;
+    color: var(--sa-text);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.sa-tab:hover {
+    border-color: var(--sa-primary);
+    color: var(--sa-primary);
+}
+
+.sa-tab.active {
+    background: var(--sa-primary);
+    border-color: var(--sa-primary);
+    color: white;
+}
+
+.sa-tab .sa-count {
+    background: rgba(0,0,0,0.1);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 12px;
+    margin-left: 5px;
+}
+
+/* Search Box */
+.sa-search-box {
+    margin-bottom: 25px;
+}
+
+.sa-search-box form {
+    display: flex;
+    gap: 10px;
+}
+
+.sa-search-box input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 2px solid var(--sa-border);
+    border-radius: var(--sa-radius-sm);
+    font-size: 15px;
+}
+
+.sa-search-box input:focus {
+    outline: none;
+    border-color: var(--sa-primary);
+}
+
+.sa-search-box button {
+    padding: 12px 20px;
+    background: var(--sa-primary);
+    color: white;
+    border: none;
+    border-radius: var(--sa-radius-sm);
+    cursor: pointer;
+    font-size: 16px;
+}
+
+/* Buttons */
+.sa-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: var(--sa-radius-sm);
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+    font-size: 14px;
+}
+
+.sa-btn-primary {
+    background: var(--sa-primary);
+    color: white;
+}
+
+.sa-btn-primary:hover {
+    background: #c0392b;
+    transform: translateY(-2px);
+    box-shadow: var(--sa-shadow);
+}
+
+.sa-btn-donate {
+    background: var(--sa-secondary);
+    color: white;
+    width: 100%;
+}
+
+.sa-btn-donate:hover {
+    background: #219a52;
+}
+
+.sa-btn-large {
+    padding: 16px 32px;
+    font-size: 16px;
+}
+
+.sa-btn-block {
+    width: 100%;
+}
+
+/* Campaign Grid */
+.sa-campaign-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 25px;
+}
+
+/* Campaign Card */
+.sa-campaign-card {
+    background: white;
+    border-radius: var(--sa-radius);
+    overflow: hidden;
+    box-shadow: var(--sa-shadow);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.sa-campaign-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--sa-shadow-hover);
+}
+
+.sa-campaign-header {
+    padding: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.sa-campaign-category {
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: white;
+    letter-spacing: 0.5px;
+}
+
+/* Badges */
+.sa-badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.sa-badge-urgent {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.sa-badge-featured {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.sa-badge-ending {
+    background: #dbeafe;
+    color: #2563eb;
+}
+
+.sa-campaign-body {
+    padding: 0 15px 15px;
+}
+
+.sa-campaign-body h3 {
+    font-size: 18px;
+    margin: 0 0 10px 0;
+    line-height: 1.3;
+}
+
+.sa-campaign-body h3 a {
+    color: var(--sa-dark);
+    text-decoration: none;
+}
+
+.sa-campaign-body h3 a:hover {
+    color: var(--sa-primary);
+}
+
+.sa-campaign-desc {
+    color: var(--sa-text-light);
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 15px;
+}
+
+/* Progress Bar */
+.sa-progress-bar {
+    height: 8px;
+    background: #ecf0f1;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 15px;
+}
+
+.sa-progress-bar div {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+.sa-progress-large {
+    height: 12px;
+}
+
+/* Campaign Stats */
+.sa-campaign-stats {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    padding-top: 15px;
+    border-top: 1px solid var(--sa-border);
+}
+
+.sa-stat-item {
+    text-align: center;
+}
+
+.sa-stat-main {
+    display: block;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--sa-dark);
+}
+
+.sa-stat-sub {
+    font-size: 12px;
+    color: var(--sa-text-light);
+}
+
+.sa-campaign-footer {
+    padding: 12px 15px;
+    background: var(--sa-light);
+    font-size: 12px;
+    color: var(--sa-text-light);
+    display: flex;
+    justify-content: space-between;
+}
+
+/* Empty State */
+.sa-empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: var(--sa-radius);
+    box-shadow: var(--sa-shadow);
+    grid-column: 1 / -1;
+}
+
+.sa-empty-icon {
+    font-size: 60px;
+    margin-bottom: 15px;
+}
+
+.sa-empty-state h3 {
+    font-size: 22px;
+    color: var(--sa-dark);
+    margin: 0 0 10px 0;
+}
+
+.sa-empty-state p {
+    color: var(--sa-text-light);
+    margin-bottom: 20px;
+}
+
+/* Campaign Detail */
+.sa-campaign-detail {
+    padding: 20px;
+}
+
+.sa-detail-header {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.sa-campaign-detail h1 {
+    font-size: 28px;
+    color: var(--sa-dark);
+    margin: 0 0 15px 0;
+    line-height: 1.3;
+}
+
+.sa-detail-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    color: var(--sa-text-light);
+    font-size: 14px;
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--sa-border);
+}
+
+.sa-detail-progress {
+    background: var(--sa-light);
+    padding: 25px;
+    border-radius: var(--sa-radius);
+    margin-bottom: 25px;
+}
+
+.sa-progress-visual {
+    margin-bottom: 20px;
+}
+
+.sa-progress-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.sa-progress-current {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--sa-secondary);
+}
+
+.sa-progress-goal {
+    color: var(--sa-text-light);
+}
+
+.sa-progress-stats {
+    display: flex;
+    gap: 40px;
+}
+
+.sa-detail-section {
+    margin-bottom: 30px;
+}
+
+.sa-detail-section h3 {
+    font-size: 18px;
+    color: var(--sa-dark);
+    margin: 0 0 15px 0;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--sa-primary);
+}
+
+.sa-description {
+    line-height: 1.8;
+    color: var(--sa-text);
+    font-size: 15px;
+}
+
+/* Share Buttons */
+.sa-share-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.sa-share-btn {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    transition: transform 0.2s ease;
+}
+
+.sa-share-btn:hover {
+    transform: scale(1.1);
+    color: white;
+}
+
+.sa-share-facebook { background: #1877f2; }
+.sa-share-twitter { background: #1a1a1a; }
+.sa-share-whatsapp { background: #25d366; }
+
+/* Donation Sidebar */
+.sa-donation-sidebar {
+    background: white;
+    border-radius: var(--sa-radius);
+    padding: 20px;
+    box-shadow: var(--sa-shadow);
+}
+
+.sa-donation-stats {
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--sa-border);
+}
+
+.sa-donation-amount {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--sa-secondary);
+}
+
+.sa-donation-goal {
+    color: var(--sa-text-light);
+    margin-bottom: 15px;
+}
+
+.sa-donation-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--sa-text-light);
+    margin-top: 10px;
+}
+
+.sa-donation-sidebar h3 {
+    margin: 0 0 15px 0;
+    font-size: 18px;
+}
+
+/* Quick Amount Buttons */
+.sa-quick-amounts {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.sa-amount-btn {
+    flex: 1;
+    padding: 10px;
+    background: var(--sa-light);
+    border: 2px solid var(--sa-border);
+    border-radius: var(--sa-radius-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.sa-amount-btn:hover,
+.sa-amount-btn.active {
+    background: var(--sa-secondary);
+    border-color: var(--sa-secondary);
+    color: white;
+}
+
+/* Donation Item */
+.sa-donation-item {
+    padding: 12px;
+    background: var(--sa-light);
+    border-radius: var(--sa-radius-sm);
+    margin-bottom: 10px;
+    border-left: 3px solid var(--sa-secondary);
+}
+
+.sa-donation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.sa-donation-amount {
+    font-weight: 700;
+    color: var(--sa-secondary);
+    font-size: 14px;
+}
+
+.sa-donation-message {
+    font-style: italic;
+    color: var(--sa-text-light);
+    font-size: 13px;
+    margin: 5px 0;
+}
+
+.sa-donation-date {
+    font-size: 11px;
+    color: #999;
+}
+
+/* Forms */
+.sa-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.sa-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.sa-form-group label {
+    font-weight: 600;
+    color: var(--sa-dark);
+    font-size: 14px;
+}
+
+.sa-form-group input,
+.sa-form-group select,
+.sa-form-group textarea {
+    padding: 12px 16px;
+    border: 2px solid var(--sa-border);
+    border-radius: var(--sa-radius-sm);
+    font-size: 15px;
+    transition: border-color 0.2s ease;
+}
+
+.sa-form-group input:focus,
+.sa-form-group select:focus,
+.sa-form-group textarea:focus {
+    outline: none;
+    border-color: var(--sa-primary);
+}
+
+.sa-form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.sa-hint {
+    font-weight: normal;
+    color: var(--sa-text-light);
+    font-size: 12px;
+}
+
+.sa-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.sa-checkbox input {
+    width: 18px;
+    height: 18px;
+}
+
+.sa-form-note {
+    font-size: 12px;
+    color: var(--sa-text-light);
+    text-align: center;
+}
+
+.sa-form-row {
+    margin-bottom: 5px;
+}
+
+.sa-form-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.sa-form-actions {
+    margin-top: 10px;
+}
+
+/* Create Campaign */
+.sa-create-campaign {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.sa-create-header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.sa-create-header h2 {
+    font-size: 28px;
+    color: var(--sa-dark);
+    margin: 0 0 10px 0;
+}
+
+.sa-create-header p {
+    color: var(--sa-text-light);
+}
+
+.sa-create-tips {
+    background: #e8f5e9;
+    border: 1px solid #a5d6a7;
+    border-radius: var(--sa-radius);
+    padding: 20px;
+    margin-bottom: 25px;
+}
+
+.sa-create-tips h4 {
+    margin: 0 0 12px 0;
+    color: var(--sa-dark);
+}
+
+.sa-create-tips ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.sa-create-tips li {
+    margin-bottom: 8px;
+    color: var(--sa-text);
+}
+
+/* My Campaigns */
+.sa-my-campaigns {
+    padding: 20px;
+}
+
+.sa-my-campaigns-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.sa-my-campaigns-header h2 {
+    margin: 0;
+    color: var(--sa-dark);
+}
+
+.sa-my-campaigns-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.sa-my-campaign-card {
+    background: white;
+    border-radius: var(--sa-radius);
+    padding: 20px;
+    box-shadow: var(--sa-shadow);
+}
+
+.sa-my-campaign-header {
+    margin-bottom: 10px;
+}
+
+.sa-my-campaign-card h4 {
+    margin: 0 0 15px 0;
+    font-size: 16px;
+}
+
+.sa-my-campaign-card h4 a {
+    color: var(--sa-dark);
+    text-decoration: none;
+}
+
+.sa-my-campaign-card h4 a:hover {
+    color: var(--sa-primary);
+}
+
+.sa-my-campaign-stats {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--sa-text-light);
+    margin-top: 10px;
+}
+
+/* Status Badges */
+.sa-status {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.sa-status-active { background: #d1fae5; color: #059669; }
+.sa-status-completed { background: #dbeafe; color: #2563eb; }
+.sa-status-paused { background: #fef3c7; color: #d97706; }
+.sa-status-draft { background: #e5e7eb; color: #6b7280; }
+
+/* Messages */
+.sa-error {
+    background: #fee2e2;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+    padding: 15px 20px;
+    border-radius: var(--sa-radius-sm);
+    margin-bottom: 20px;
+}
+
+.sa-error ul {
+    margin: 5px 0 0 0;
+    padding-left: 20px;
+}
+
+.sa-success {
+    background: #d1fae5;
+    border: 1px solid #a7f3d0;
+    color: #059669;
+    padding: 15px 20px;
+    border-radius: var(--sa-radius-sm);
+    margin-bottom: 20px;
+}
+
+.sa-empty-text {
+    color: var(--sa-text-light);
+    font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .sa-stats-banner {
+        padding: 20px;
+    }
+    
+    .sa-stats-banner .sa-stat-value {
+        font-size: 22px;
+    }
+    
+    .sa-campaigns-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .sa-campaign-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .sa-form-row-2 {
+        grid-template-columns: 1fr;
+    }
+    
+    .sa-progress-stats {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .sa-my-campaigns-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .sa-campaign-detail h1 {
+        font-size: 22px;
+    }
+    
+    .sa-detail-meta {
+        flex-direction: column;
+        gap: 8px;
+    }
+}

@@ -1,0 +1,65 @@
+<div class="bx-support-scheme-campaign-detail">
+    <!-- Campaign Header -->
+    <div class="bx-support-scheme-campaign-header bx-def-margin-sec-bottom">
+        <h1 class="bx-def-font-h1">{title}</h1>
+        <div class="bx-support-scheme-campaign-meta">
+            <span class="bx-support-scheme-campaign-category">
+                <i class="sys-icon tag"></i> {category}
+            </span>
+            <span class="bx-support-scheme-campaign-date">
+                <i class="sys-icon calendar"></i> {added}
+            </span>
+            <span class="bx-support-scheme-campaign-status status-{status_class}">
+                <i class="sys-icon info-circle"></i> {status}
+            </span>
+        </div>
+    </div>
+    
+    <!-- Campaign Content -->
+    <div class="bx-support-scheme-campaign-content bx-def-margin-sec-bottom">
+        <div class="bx-support-scheme-campaign-description bx-def-font-large">
+            {description}
+        </div>
+    </div>
+    
+    <!-- Progress Section -->
+    <div class="bx-support-scheme-progress-section bx-def-margin-sec-bottom">
+        <h3 class="bx-def-font-h3">Fundraising Progress</h3>
+        <div class="bx-support-scheme-progress-amounts">
+            <div class="bx-support-scheme-progress-raised">
+                <span class="bx-support-scheme-progress-label">Raised</span>
+                <span class="bx-support-scheme-progress-value">{currency} {raised_amount}</span>
+            </div>
+            <div class="bx-support-scheme-progress-goal">
+                <span class="bx-support-scheme-progress-label">Goal</span>
+                <span class="bx-support-scheme-progress-value">{currency} {goal_amount}</span>
+            </div>
+        </div>
+        
+        <div class="bx-support-scheme-progress">
+            <div class="bx-support-scheme-progress-bar">
+                <div class="bx-support-scheme-progress-fill" style="width: {progress_width}%"></div>
+            </div>
+            <span class="bx-support-scheme-progress-percent">{progress}%</span>
+        </div>
+        
+        <div class="bx-support-scheme-donors-count">
+            <i class="sys-icon users"></i>
+            {donors_count} donors
+        </div>
+    </div>
+    
+    <!-- Donation Form -->
+    <div class="bx-support-scheme-donation-form bx-def-margin-sec-bottom">
+        <h3 class="bx-def-font-h3">Make a Donation</h3>
+        {donation_form}
+    </div>
+    
+    <!-- Recent Donors -->
+    <div class="bx-support-scheme-donors">
+        <h3 class="bx-def-font-h3">Recent Donors</h3>
+        <div class="bx-support-scheme-donors-list">
+            {donors}
+        </div>
+    </div>
+</div>

@@ -1,0 +1,34 @@
+<div class="bx-support-scheme">
+    <!-- Featured Campaigns -->
+    <bx_if:featured>
+        <div class="bx-support-scheme-featured">
+            <h2 class="bx-def-margin-sec-bottom">{featured_campaigns}</h2>
+        </div>
+    </bx_if:featured>
+    
+    <!-- Category Filter -->
+    <div class="bx-support-scheme-filter bx-def-margin-sec-bottom">
+        {categories}
+    </div>
+    
+    <!-- Campaigns Grid -->
+    <div class="bx-support-scheme-grid">
+        {campaigns}
+    </div>
+    
+    <!-- Empty State -->
+    <bx_if:empty>
+        <div class="bx-support-scheme-empty">
+            <i class="sys-icon hands-helping"></i>
+            <p>{message}</p>
+        </div>
+    </bx_if:empty>
+    
+    <!-- Create Button -->
+    <div class="bx-support-scheme-create bx-def-margin-sec-top">
+        <a href="{create_link}" class="bx-btn bx-btn-primary">
+            <i class="sys-icon plus-circle"></i>
+            <bx_text:_sa_support_scheme_menu_item_title_add_campaign />
+        </a>
+    </div>
+</div>

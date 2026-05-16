@@ -1,0 +1,112 @@
+<?php defined('BX_DOL') or die('hack attempt');
+
+bx_import('BxDolModuleDb');
+
+class SaRentalsDb extends BxDolModuleDb
+{
+    function __construct(&$oConfig)
+    {
+        parent::__construct($oConfig);
+    }
+
+    function getListings($aParams = array())
+    {
+        $sWhere = " WHERE `status` = 'active' ";
+        if (!empty($aParams['province']))
+            $sWhere .= " AND `province` = '" . addslashes($aParams['province']) . "'";
+        if (!empty($aParams['type']))
+            $sWhere .= " AND `property_type` = '" . addslashes($aParams['type']) . "'";
+        if (isset($aParams['bedrooms']) && $aParams['bedrooms'] !== '')
+            $sWhere .= " AND `bedrooms` >= " . (int)$aParams['bedrooms'];
+        if (!empty($aParams['group_id']))
+            $sWhere .= " AND `group_id` = " . (int)$aParams['group_id'];
+        if (!empty($aParams['all_statuses']) && !empty($aParams['author_id']))
+            $sWhere = " WHERE `author_id` = " . (int)$aParams['author_id'];
+        elseif (!empty($aParams['author_id']))
+            $sWhere .= " AND `author_id` = " . (int)$aParams['author_id'];
+        $sOrder = !empty($aParams['featured_first'])
+            ? " ORDER BY `featured` DESC, `created` DESC"
+            : " ORDER BY `created` DESC";
+        $sLimit = isset($aParams['limit']) ? " LIMIT " . (int)$aParams['limit'] : " LIMIT 20";
+        return $this->getAll("SELECT * FROM `sa_rentals_listings`" . $sWhere . $sOrder . $sLimit);
+    }
+
+    function getListing($iId)
+    {
+        return $this->getRow("SELECT * FROM `sa_rentals_listings` WHERE `id` = " . (int)$iId . " LIMIT 1");
+    }
+
+    function addListing($aData)
+    {
+        $aFields = array('title','description','property_type','province','city','address',
+            'contact','contact_phone','contact_whatsapp','contact_email',
+            'lease_term','furnished','security_features');
+        $aParts = array();
+        foreach ($aFields as $f)
+            $aParts[$f] = "'" . addslashes(isset($aData[$f]) ? $aData[$f] : '') . "'";
+        $aParts['rent_zar']           = (float)(isset($aData['rent_zar']) ? $aData['rent_zar'] : 0);
+        $aParts['deposit_zar']        = (float)(isset($aData['deposit_zar']) ? $aData['deposit_zar'] : 0);
+        $aParts['author_id']          = (int)$aData['author_id'];
+        $aParts['bedrooms']           = (int)(isset($aData['bedrooms']) ? $aData['bedrooms'] : 0);
+        $aParts['bathrooms']          = (int)(isset($aData['bathrooms']) ? $aData['bathrooms'] : 0);
+        $aParts['parking']            = (int)!empty($aData['parking']);
+        $aParts['pets_allowed']       = (int)!empty($aData['pets_allowed']);
+        $aParts['utilities_included'] = (int)!empty($aData['utilities_included']);
+        $aParts['prepaid_electricity']= (int)!empty($aData['prepaid_electricity']);
+        $aParts['wifi_available']     = (int)!empty($aData['wifi_available']);
+        $aParts['group_id']           = (int)(isset($aData['group_id']) ? $aData['group_id'] : 0);
+        $aParts['status']             = "'active'";
+        $aParts['created']            = "NOW()";
+        if (!empty($aData['available_from']))
+            $aParts['available_from'] = "'" . addslashes($aData['available_from']) . "'";
+        $sCols = '`' . implode('`,`', array_keys($aParts)) . '`';
+        $sVals = implode(',', array_values($aParts));
+        return $this->query("INSERT INTO `sa_rentals_listings` ($sCols) VALUES ($sVals)");
+    }
+
+    function getLastInsertId()
+    {
+        return $this->lastId();
+    }
+
+    function updateListing($iId, $aData)
+    {
+        $aParts = array();
+        foreach (array('title','description','property_type','province','city','address',
+            'contact','contact_phone','contact_whatsapp','contact_email',
+            'lease_term','furnished','security_features','status') as $sCol)
+            if (isset($aData[$sCol]))
+                $aParts[] = "`$sCol` = '" . addslashes($aData[$sCol]) . "'";
+        foreach (array('rent_zar','deposit_zar') as $sCol)
+            if (isset($aData[$sCol]))
+                $aParts[] = "`$sCol` = " . (float)$aData[$sCol];
+        foreach (array('bedrooms','bathrooms','group_id') as $sCol)
+            if (isset($aData[$sCol]))
+                $aParts[] = "`$sCol` = " . (int)$aData[$sCol];
+        foreach (array('parking','pets_allowed','utilities_included','prepaid_electricity','wifi_available') as $sCol)
+            if (isset($aData[$sCol]))
+                $aParts[] = "`$sCol` = " . (int)!empty($aData[$sCol]);
+        if (isset($aData['available_from']))
+            $aParts[] = "`available_from` = '" . addslashes($aData['available_from']) . "'";
+        if (isset($aData['media_storage_ids']))
+            $aParts[] = "`media_storage_ids` = '" . addslashes($aData['media_storage_ids']) . "'";
+        if (empty($aParts)) return false;
+        return $this->query("UPDATE `sa_rentals_listings` SET " . implode(',', $aParts) . " WHERE `id` = " . (int)$iId);
+    }
+
+    function incrementViews($iId)
+    {
+        return $this->query("UPDATE `sa_rentals_listings` SET `views_count` = `views_count` + 1 WHERE `id` = " . (int)$iId);
+    }
+
+    function deleteListing($iId)
+    {
+        return $this->query("DELETE FROM `sa_rentals_listings` WHERE `id` = " . (int)$iId);
+    }
+
+    function getStorageIds($iListingId)
+    {
+        $sIds = $this->getOne("SELECT `media_storage_ids` FROM `sa_rentals_listings` WHERE `id` = " . (int)$iListingId);
+        return !empty($sIds) ? explode(',', $sIds) : array();
+    }
+}

@@ -1,0 +1,764 @@
+/* =====================================================
+   Ward Councilor Portal — Artificer Theme Integration
+   ===================================================== */
+.wc-portal, .wc-requests, .wc-meetings,
+.wc-announcements, .wc-request-detail {
+    color: var(--color-text, #2d2d2d);
+    background: var(--color-bg, #f4f4f4);
+}
+.wc-stat-card, .wc-request-card, .wc-meeting-item,
+.wc-announcement-item, .wc-section, .wc-quick-actions,
+.wc-ward-info, .wc-councilor-response, .wc-empty-state {
+    background: var(--color-box-bg, #ffffff);
+    border: 1px solid var(--color-box-border, #e0e0e0);
+    border-radius: var(--border-radius, 8px);
+}
+.wc-btn-primary {
+    background: var(--color-primary, #007749);
+    color: var(--color-primary-text, #ffffff) !important;
+    border-radius: var(--border-radius, 4px);
+    text-decoration: none;
+    display: inline-block;
+    padding: 8px 16px;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+.wc-btn-primary:hover { background: var(--color-primary-hover, #005a35); }
+.wc-btn-secondary {
+    background: var(--color-secondary, #f0f0f0);
+    color: var(--color-text, #333333) !important;
+    border: 1px solid var(--color-box-border, #dddddd);
+    border-radius: var(--border-radius, 4px);
+    text-decoration: none;
+    display: inline-block;
+    padding: 8px 16px;
+    transition: background 0.2s;
+}
+.wc-btn-secondary:hover { background: var(--color-box-border, #e0e0e0); }
+.wc-tab {
+    display: inline-block;
+    padding: 8px 16px;
+    text-decoration: none;
+    color: var(--color-text, #555);
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+}
+.wc-tab:hover { color: var(--color-primary, #007749); }
+.wc-tab.active {
+    border-bottom: 2px solid var(--color-primary, #007749);
+    color: var(--color-primary, #007749);
+    font-weight: 600;
+}
+.wc-status {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+.wc-status-pending     { background: var(--color-warning-light, #fff3cd); color: var(--color-warning,  #856404); }
+.wc-status-in_progress { background: var(--color-info-light,    #cce5ff); color: var(--color-info,     #004085); }
+.wc-status-resolved    { background: var(--color-success-light, #d4edda); color: var(--color-success,  #155724); }
+.wc-status-closed      { background: var(--color-muted-light,   #e2e3e5); color: var(--color-muted,    #383d41); }
+.wc-priority-urgent { border-left: 4px solid #dc3545; }
+.wc-priority-high   { border-left: 4px solid #fd7e14; }
+.wc-priority-medium { border-left: 4px solid var(--color-primary, #007749); }
+.wc-priority-low    { border-left: 4px solid var(--color-muted, #6c757d); }
+a.wc-link { color: var(--color-link, #007749); }
+a.wc-link:hover { color: var(--color-link-hover, #005a35); }
+.wc-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+    margin: 20px 0;
+}
+.wc-stat-card { padding: 20px; display: flex; align-items: center; gap: 12px; }
+.wc-stat-value { font-size: 28px; font-weight: 700; color: var(--color-primary, #007749); display: block; }
+.wc-stat-label { font-size: 13px; color: var(--color-text-muted, #888); display: block; }
+.wc-dashboard-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+    margin-top: 24px;
+}
+@media (max-width: 768px) {
+    .wc-dashboard-grid { grid-template-columns: 1fr; }
+    .wc-stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+.wc-section { padding: 20px; margin-bottom: 20px; }
+.wc-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--color-box-border, #e0e0e0);
+}
+.wc-section-header h2 { margin: 0; font-size: 18px; }
+.wc-quick-actions { padding: 20px; }
+.wc-quick-actions h3 { margin: 0 0 12px; font-size: 16px; }
+.wc-quick-actions a { display: block; margin-bottom: 8px; text-align: center; }
+.wc-empty-state { text-align: center; padding: 40px 20px; }
+.wc-empty-icon { font-size: 48px; display: block; margin-bottom: 12px; }
+/* ══════════════════════════════════════════════
+   Ward Councilor Module — main.css
+   Harmonised with slim-dark (bx_lucid) theme
+   ══════════════════════════════════════════════ */
+
+:root {
+    --wc-primary:        #007749;
+    --wc-primary-dark:   #005a36;
+    --wc-primary-hover:  rgba(0, 87, 194, 1);
+    --wc-accent:         rgba(24, 144, 255, 1);
+    --wc-accent-hover:   rgba(64, 169, 255, 1);
+    --wc-body-bg:        #252728;
+    --wc-card-bg:        rgba(45, 45, 45, 1);
+    --wc-input-bg:       rgba(255, 255, 255, 0.9);
+    --wc-input-bg-focus: rgba(255, 255, 255, 1);
+    --wc-input-text:     rgba(38, 38, 38, 1);
+    --wc-input-border:   rgba(50, 100, 180, 0.2);
+    --wc-input-focus:    rgba(24, 144, 255, 1);
+    --wc-border-radius:  8px;
+    --wc-text-light:     rgba(189, 182, 182, 0.85);
+    --wc-text-muted:     rgba(140, 140, 140, 1);
+    --wc-btn-primary-bg: rgba(51, 102, 255, 1);
+    --wc-btn-primary-h:  rgba(0, 87, 194, 1);
+    --wc-btn-text:       rgba(255, 255, 255, 1);
+    --wc-success:        #007749;
+    --wc-warning:        #FF9800;
+    --wc-danger:         #e53e3e;
+}
+
+/* ── Page wrapper ── */
+.wc-page-wrapper {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 1rem;
+    font-size: 0.8125rem;
+    font-family: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    color: var(--wc-text-light);
+}
+
+/* ── Page header / hero ── */
+.wc-page-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+.wc-page-header .wc-page-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.25rem;
+}
+.wc-page-header h1 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 0.5rem;
+}
+.wc-page-header p {
+    color: var(--wc-text-muted);
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+/* ── Tips box ── */
+.wc-tips-box {
+    background-color: rgba(0, 119, 73, 0.12);
+    border: 1px solid rgba(0, 119, 73, 0.3);
+    border-radius: var(--wc-border-radius);
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+}
+.wc-tips-box h3 {
+    color: #6ee7b7 !important;
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem;
+}
+.wc-tips-box ul {
+    margin: 0;
+    padding-left: 1.25rem;
+    color: var(--wc-text-muted);
+    font-size: 0.9rem;
+}
+.wc-tips-box li {
+    margin-bottom: 0.25rem;
+}
+
+/* ── Form card ── */
+.wc-form-card {
+    background-color: var(--wc-card-bg);
+    border: 1px solid rgba(64, 217, 41, 0.1);
+    border-radius: var(--wc-border-radius);
+    padding: 1.75rem;
+    box-shadow: 0px 2px 6px 0px rgba(0, 0, 0, 0.3);
+}
+
+/* ── Form groups ── */
+.wc-form-group {
+    margin-bottom: 1.25rem;
+}
+.wc-form-group label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--wc-text-light);
+    margin-bottom: 0.4rem;
+}
+.wc-form-group label .wc-required {
+    color: var(--wc-danger);
+    margin-left: 2px;
+}
+
+/* ── All inputs, selects, textareas ── */
+.wc-form-group input,
+.wc-form-group select,
+.wc-form-group textarea,
+.bx-lucid .wc-form-group input,
+.bx-lucid .wc-form-group select,
+.bx-lucid .wc-form-group textarea {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    height: 2.25rem;
+    background-color: var(--wc-input-bg) !important;
+    color: var(--wc-input-text) !important;
+    -webkit-text-fill-color: var(--wc-input-text) !important;
+    border: 1px solid var(--wc-input-border);
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-family: inherit;
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.wc-form-group textarea {
+    height: auto;
+    min-height: 7rem;
+    resize: vertical;
+    padding: 0.75rem 1rem;
+}
+.wc-form-group input:focus,
+.wc-form-group select:focus,
+.wc-form-group textarea:focus {
+    outline: none;
+    border-color: var(--wc-input-focus) !important;
+    background-color: var(--wc-input-bg-focus) !important;
+    box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+.wc-form-group input::placeholder,
+.wc-form-group textarea::placeholder {
+    color: rgba(38, 38, 38, 0.45) !important;
+    -webkit-text-fill-color: rgba(38, 38, 38, 0.45) !important;
+}
+
+/* ── Select options ── */
+.wc-form-group select option {
+    background-color: #ffffff !important;
+    color: rgba(38, 38, 38, 1) !important;
+}
+
+/* ── Two-column row ── */
+.wc-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+@media (max-width: 600px) {
+    .wc-form-row { grid-template-columns: 1fr; }
+}
+
+/* ── Submit button ── */
+.wc-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.5rem 1.25rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    text-decoration: none;
+}
+.wc-btn-primary {
+    background-color: var(--wc-btn-primary-bg);
+    color: var(--wc-btn-text) !important;
+    -webkit-text-fill-color: var(--wc-btn-text) !important;
+}
+.wc-btn-primary:hover {
+    background-color: var(--wc-btn-primary-h);
+}
+.wc-btn-large {
+    width: 100%;
+    padding: 0.65rem;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+/* ── Status badges ── */
+.wc-badge {
+    display: inline-block;
+    padding: 0.2rem 0.65rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+.wc-badge-pending   { background: rgba(255, 152, 0, 0.15);  color: #FF9800; }
+.wc-badge-open      { background: rgba(24, 144, 255, 0.15); color: rgba(64, 169, 255, 1); }
+.wc-badge-progress  { background: rgba(51, 102, 255, 0.15); color: rgba(51, 102, 255, 1); }
+.wc-badge-resolved  { background: rgba(0, 119, 73, 0.15);   color: #6ee7b7; }
+.wc-badge-closed    { background: rgba(140, 140, 140, 0.15);color: rgba(140, 140, 140, 1); }
+
+/* ── Cards / list items ── */
+.wc-request-card,
+.wc-meeting-card {
+    background-color: var(--wc-card-bg);
+    border: 1px solid rgba(64, 217, 41, 0.1);
+    border-radius: var(--wc-border-radius);
+    padding: 0.875rem 1rem;
+    margin-bottom: 0.75rem;
+    box-shadow: 0px 2px 6px 0px rgba(0, 0, 0, 0.2);
+    color: var(--wc-text-light);
+    font-size: 0.8125rem;
+}
+.wc-request-card h3,
+.wc-meeting-card h3 {
+    color: #ffffff !important;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin: 0 0 0.35rem;
+}
+.wc-request-card p,
+.wc-meeting-card p {
+    font-size: 0.8125rem;
+    color: var(--wc-text-muted);
+    margin: 0.2rem 0;
+}
+
+/* ── Empty state ── */
+.wc-empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--wc-text-muted);
+}
+.wc-empty-state .wc-empty-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+/* ══════════════════════════════════════════════
+   Landing Page — Stats, Status, Filters
+   ══════════════════════════════════════════════ */
+
+/* ── Stats grid ── */
+.wc-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+@media (max-width: 700px) {
+    .wc-stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 400px) {
+    .wc-stats-grid { grid-template-columns: 1fr; }
+}
+
+.wc-stat-card {
+    background-color: rgba(45, 45, 45, 1);
+    border: 1px solid rgba(0, 119, 73, 0.2);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+}
+.wc-stat-card.wc-stat-warning { border-color: rgba(255, 152, 0, 0.3); }
+.wc-stat-card.wc-stat-info    { border-color: rgba(24, 144, 255, 0.3); }
+.wc-stat-card.wc-stat-success { border-color: rgba(0, 119, 73, 0.4); }
+
+.wc-stat-icon {
+    font-size: 1.75rem;
+    line-height: 1;
+}
+.wc-stat-content {
+    display: flex;
+    flex-direction: column;
+}
+.wc-stat-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1;
+}
+.wc-stat-label {
+    font-size: 0.75rem;
+    color: rgba(140, 140, 140, 1);
+    margin-top: 0.2rem;
+}
+
+/* ── Status badges (inline) ── */
+.wc-status {
+    display: inline-block;
+    padding: 0.2rem 0.65rem;
+    border-radius: 12px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+.wc-status-pending    { background: rgba(255, 152, 0, 0.15);  color: #FF9800; }
+.wc-status-open       { background: rgba(24, 144, 255, 0.15); color: rgba(64, 169, 255, 1); }
+.wc-status-in_progress,
+.wc-status-in-progress{ background: rgba(51, 102, 255, 0.15); color: rgba(100, 149, 255, 1); }
+.wc-status-resolved   { background: rgba(0, 119, 73, 0.15);   color: #6ee7b7; }
+.wc-status-closed     { background: rgba(140,140,140, 0.15);  color: rgba(140,140,140,1); }
+
+/* ── Status filter tabs ── */
+.wc-status-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+}
+.wc-status-filter a,
+.wc-status-filter button {
+    padding: 0.35rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 1px solid rgba(0, 119, 73, 0.3);
+    background: transparent;
+    color: rgba(140, 140, 140, 1);
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+.wc-status-filter a:hover,
+.wc-status-filter button:hover,
+.wc-status-filter a.active,
+.wc-status-filter button.active {
+    background: #007749;
+    border-color: #007749;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+}
+
+/* ── Submit button — SA Green (landing page brand) ── */
+.wc-btn-primary {
+    background-color: #007749 !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+}
+.wc-btn-primary:hover {
+    background-color: #005a36 !important;
+}
+
+/* ══════════════════════════════════════════════
+   Live UNA readability fixes
+   ══════════════════════════════════════════════ */
+
+.wc-portal,
+.wc-requests,
+.wc-meetings,
+.wc-announcements,
+.wc-request-detail,
+.wc-meeting-detail,
+.wc-announcement-detail,
+.wc-create-request,
+.wc-create-meeting,
+.wc-create-announcement {
+    color: var(--wc-text-light) !important;
+    background: transparent !important;
+}
+
+.wc-dashboard-header,
+.wc-create-header {
+    background: linear-gradient(135deg, rgba(0, 119, 73, 0.18), rgba(17, 24, 39, 0.9)) !important;
+    border: 1px solid rgba(0, 119, 73, 0.28) !important;
+    border-radius: 12px !important;
+    padding: 1.25rem 1.5rem !important;
+    margin-bottom: 1.25rem !important;
+}
+
+.wc-dashboard-header h1,
+.wc-create-header h2,
+.wc-page-header h1,
+.wc-request-detail h1,
+.wc-meeting-detail h1,
+.wc-announcement-detail h1,
+.wc-section-header h2,
+.wc-quick-actions h3,
+.wc-section h3,
+.wc-ward-header h2,
+.wc-meeting-card h3,
+.wc-request-card h3,
+.wc-announcement-card h3 {
+    color: #ffffff !important;
+    font-size: 0.875rem !important;
+    font-weight: 600 !important;
+    margin: 0 0 0.5rem 0 !important;
+}
+
+.wc-dashboard-header p,
+.wc-create-header p,
+.wc-page-header p,
+.wc-section,
+.wc-section p,
+.wc-detail-meta span,
+.wc-announcement-date,
+.wc-announcement-meta,
+.wc-meeting-info span,
+.wc-request-card p,
+.wc-meeting-card p,
+.wc-announcement-card p,
+.wc-empty-state,
+.wc-stat-label,
+.wc-recent-meta,
+.wc-ward-meta,
+.wc-ward-contact,
+.wc-notes-date {
+    color: var(--wc-text-light) !important;
+    font-size: 0.8125rem !important;
+}
+
+.wc-section,
+.wc-quick-actions,
+.wc-ward-info,
+.wc-councilor-response,
+.wc-empty-state,
+.wc-request-card,
+.wc-meeting-card,
+.wc-announcement-card,
+.wc-announcement-item,
+.wc-recent-item,
+.wc-meeting-item,
+.wc-request-detail,
+.wc-meeting-detail,
+.wc-announcement-detail,
+.wc-create-request .wc-form,
+.wc-create-meeting .wc-form,
+.wc-create-announcement .wc-form {
+    background-color: rgba(45, 45, 45, 0.96) !important;
+    border: 1px solid rgba(0, 119, 73, 0.18) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22) !important;
+}
+
+.wc-create-request .wc-form,
+.wc-create-meeting .wc-form,
+.wc-create-announcement .wc-form {
+    border-radius: 12px !important;
+    padding: 1.5rem !important;
+}
+
+.wc-create-tips {
+    background: rgba(0, 119, 73, 0.12) !important;
+    border: 1px solid rgba(0, 119, 73, 0.28) !important;
+    border-radius: 12px !important;
+    padding: 1rem 1.25rem !important;
+    margin-bottom: 1.25rem !important;
+}
+
+.wc-create-tips h4,
+.wc-create-tips li,
+.wc-create-tips p {
+    color: #d8f7e8 !important;
+}
+
+.wc-announcement-item a,
+.wc-recent-content a,
+.wc-meeting-card-body a,
+.wc-request-card a,
+.wc-announcement-card a,
+.wc-link {
+    color: #bfe7ff !important;
+}
+
+.wc-announcement-item a:hover,
+.wc-recent-content a:hover,
+.wc-meeting-card-body a:hover,
+.wc-request-card a:hover,
+.wc-announcement-card a:hover,
+.wc-link:hover {
+    color: #ffffff !important;
+}
+
+.wc-quick-actions a.wc-btn-secondary,
+.wc-create-meeting .wc-btn-secondary,
+.wc-announcement-detail .wc-btn-secondary,
+.wc-meeting-detail .wc-btn-secondary {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #f3f4f6 !important;
+    border-color: rgba(255, 255, 255, 0.16) !important;
+}
+
+/* ── Heading divs (replaces h1/h2/h3 to avoid theme override) ── */
+.wc-h1 {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 0.5rem;
+    line-height: 1.3;
+}
+.wc-h2 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0 0 0.4rem;
+    line-height: 1.3;
+}
+.wc-h3 {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #e0e0e0;
+    margin: 0 0 0.35rem;
+    line-height: 1.3;
+}
+.wc-h1 a, .wc-h2 a, .wc-h3 a {
+    color: inherit !important;
+    text-decoration: none;
+}
+.wc-h1 a:hover, .wc-h2 a:hover, .wc-h3 a:hover {
+    color: #bfe7ff !important;
+}
+
+/* ══════════════════════════════════════════════
+   Detail View — Portal Layout
+   ══════════════════════════════════════════════ */
+
+.wc-detail-wrap {
+    font-size: 0.8125rem;
+    color: var(--wc-text-light);
+}
+
+/* Hero banner — title + status + meta */
+.wc-detail-hero {
+    background: linear-gradient(135deg, rgba(0,119,73,0.2), rgba(17,24,39,0.95));
+    border: 1px solid rgba(0,119,73,0.35);
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem;
+}
+.wc-detail-hero-top {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.6rem;
+    flex-wrap: wrap;
+}
+.wc-detail-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.4;
+    margin-bottom: 0.5rem;
+}
+.wc-detail-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    font-size: 0.75rem;
+    color: rgba(180,180,180,0.9);
+}
+.wc-priority-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+.wc-priority-urgent { background: rgba(220,53,69,0.2); color: #ff6b7a; border: 1px solid rgba(220,53,69,0.4); }
+.wc-priority-high   { background: rgba(253,126,20,0.2); color: #ffaa5c; border: 1px solid rgba(253,126,20,0.4); }
+.wc-priority-medium { background: rgba(0,119,73,0.2);  color: #6ee7b7; border: 1px solid rgba(0,119,73,0.4); }
+.wc-priority-low    { background: rgba(108,117,125,0.2);color: #adb5bd; border: 1px solid rgba(108,117,125,0.4); }
+
+/* Body sections */
+.wc-detail-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+.wc-detail-section {
+    background: rgba(45,45,45,0.96);
+    border: 1px solid rgba(0,119,73,0.15);
+    border-radius: 8px;
+    padding: 0.875rem 1rem;
+}
+.wc-detail-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+@media (max-width: 600px) { .wc-detail-row { grid-template-columns: 1fr; } }
+
+.wc-section-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(0,200,120,0.8);
+    margin-bottom: 0.4rem;
+    border-bottom: 1px solid rgba(0,119,73,0.2);
+    padding-bottom: 0.3rem;
+}
+.wc-section-content {
+    font-size: 0.8125rem;
+    color: rgba(210,210,210,0.95);
+    line-height: 1.6;
+}
+.wc-notes-section {
+    border-color: rgba(0,119,73,0.35);
+    background: rgba(0,119,73,0.08);
+}
+.wc-muted { color: rgba(140,140,140,0.8); }
+.wc-ref-number {
+    font-size: 0.7rem;
+    font-family: monospace;
+    color: rgba(150,150,150,0.9);
+    background: rgba(255,255,255,0.06);
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+/* ── Activity Trail ── */
+.wc-trail { display: flex; flex-direction: column; gap: 0.5rem; }
+.wc-note-entry {
+    border-left: 2px solid rgba(0,119,73,0.4);
+    padding: 0.4rem 0.75rem;
+    background: rgba(0,0,0,0.15);
+    border-radius: 0 4px 4px 0;
+}
+.wc-note-meta {
+    font-size: 0.7rem;
+    color: rgba(0,200,120,0.7);
+    margin-bottom: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+.wc-note-text {
+    font-size: 0.8125rem;
+    color: rgba(210,210,210,0.95);
+    line-height: 1.5;
+}
+
+/* ── Role badges on activity trail ── */
+.wc-role-badge {
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: 10px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.wc-role-councillor { background: rgba(0,119,73,0.25);  color: #6ee7b7; border: 1px solid rgba(0,119,73,0.5); }
+.wc-role-leadership  { background: rgba(99,102,241,0.2); color: #a5b4fc; border: 1px solid rgba(99,102,241,0.4); }
+.wc-role-moderator   { background: rgba(245,158,11,0.2); color: #fcd34d; border: 1px solid rgba(245,158,11,0.4); }
+.wc-role-admin       { background: rgba(239,68,68,0.2);  color: #fca5a5; border: 1px solid rgba(239,68,68,0.4); }
+.wc-role-member      { background: rgba(107,114,128,0.2);color: #d1d5db; border: 1px solid rgba(107,114,128,0.4); }
+.wc-note-author      { color: rgba(200,200,200,0.7); font-size: 0.75rem; }

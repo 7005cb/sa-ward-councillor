@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS `sa_ward_councilor_requests` (
   `description` text,
   `category` varchar(100) DEFAULT NULL,
   `priority` enum('low','medium','high','urgent') NOT NULL DEFAULT 'medium',
-  `status` enum('pending','active','rejected','in_progress','resolved','closed') NOT NULL DEFAULT 'pending',
+  `status` enum('pending','in_progress','resolved','closed') NOT NULL DEFAULT 'pending',
   `location` varchar(500) DEFAULT NULL,
   `contact_phone` varchar(50) DEFAULT NULL,
   `contact_email` varchar(255) DEFAULT NULL,
@@ -91,8 +91,6 @@ CREATE TABLE IF NOT EXISTS `sa_ward_councilor_notes` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `request_id` int(11) NOT NULL,
   `author_id` int(11) NOT NULL,
-  `author_name` varchar(255) DEFAULT NULL,
-  `actor_role` varchar(50) DEFAULT NULL,
   `note` text NOT NULL,
   `status_change` varchar(50) DEFAULT NULL,
   `created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -108,7 +106,6 @@ CREATE TABLE IF NOT EXISTS `sa_ward_councilor_info` (
   `municipality` varchar(255) DEFAULT NULL,
   `province` varchar(100) DEFAULT NULL,
   `population` int(11) DEFAULT NULL,
-  `councillor_name` varchar(255) DEFAULT NULL,
   `description` text,
   `office_address` varchar(500) DEFAULT NULL,
   `office_hours` varchar(255) DEFAULT NULL,
@@ -227,66 +224,6 @@ INSERT INTO `sys_pages_blocks` (`object`, `cell_id`, `module`, `title_system`, `
 INSERT INTO `sys_pages_blocks` (`object`, `cell_id`, `module`, `title_system`, `title`, `designbox_id`, `class`, `submenu`, `tabs`, `async`, `visible_for_levels`, `hidden_on`, `type`, `content`, `content_empty`, `text`, `text_updated`, `help`, `cache_lifetime`, `config_api`, `deletable`, `copyable`, `active`, `active_api`, `order`) VALUES
 ('sa_ward_councilor_manage', 1, 'sa_ward_councilor', '', '_sa_ward_councilor_block_manage', 11, '', '', 0, 0, 2147483647, '', 'service', 'a:2:{s:6:"module";s:17:"sa_ward_councilor";s:6:"method";s:16:"get_manage_block";}', '', '', 0, '', 0, '', 0, 1, 1, 0, 1);
 
--- Space Summary block (inline on Space page)
-INSERT INTO `sys_pages_blocks`
-    (`object`, `cell_id`, `module`,
-     `title_system`, `title`,
-     `designbox_id`, `class`, `submenu`, `tabs`, `async`,
-     `visible_for_levels`, `hidden_on`,
-     `type`, `content`,
-     `content_empty`, `text`, `text_updated`, `help`,
-     `cache_lifetime`, `config_api`,
-     `deletable`, `copyable`, `active`, `active_api`, `order`)
-VALUES
-    ('bx_spaces_view_profile', 0, 'sa_ward_councilor',
-     '', '_sa_ward_councilor_block_space_summary',
-     13, '', '', 0, 0,
-     2147483647, '',
-     'service', 'a:2:{s:6:"module";s:17:"sa_ward_councilor";s:6:"method";s:24:"get_space_summary_block";}',
-     '', '', 0, '',
-     0, '',
-     0, 1, 1, 0, 1);
-
--- Ward Navigation Strip block (inline on Space page)
-INSERT INTO `sys_pages_blocks`
-    (`object`, `cell_id`, `module`,
-     `title_system`, `title`,
-     `designbox_id`, `class`, `submenu`, `tabs`, `async`,
-     `visible_for_levels`, `hidden_on`,
-     `type`, `content`,
-     `content_empty`, `text`, `text_updated`, `help`,
-     `cache_lifetime`, `config_api`,
-     `deletable`, `copyable`, `active`, `active_api`, `order`)
-VALUES
-    ('bx_spaces_view_profile', 0, 'sa_ward_councilor',
-     '', '_sa_ward_councilor_block_nav_strip',
-     13, '', '', 0, 0,
-     2147483647, '',
-     'service', 'a:2:{s:6:"module";s:17:"sa_ward_councilor";s:6:"method";s:18:"get_ward_nav_strip";}',
-     '', '', 0, '',
-     0, '',
-     0, 1, 1, 0, 2);
-
--- Ward Sidebar block (inline on Space page)
-INSERT INTO `sys_pages_blocks`
-    (`object`, `cell_id`, `module`,
-     `title_system`, `title`,
-     `designbox_id`, `class`, `submenu`, `tabs`, `async`,
-     `visible_for_levels`, `hidden_on`,
-     `type`, `content`,
-     `content_empty`, `text`, `text_updated`, `help`,
-     `cache_lifetime`, `config_api`,
-     `deletable`, `copyable`, `active`, `active_api`, `order`)
-VALUES
-    ('bx_spaces_view_profile', 0, 'sa_ward_councilor',
-     '', '_sa_ward_councilor_block_sidebar',
-     13, '', '', 0, 0,
-     2147483647, '',
-     'service', 'a:2:{s:6:"module";s:17:"sa_ward_councilor";s:6:"method";s:17:"get_sidebar_block";}',
-     '', '', 0, '',
-     0, '',
-     0, 1, 1, 0, 3);
-
 -- =====================================================
 -- MENU ITEMS
 -- =====================================================
@@ -313,8 +250,8 @@ INSERT INTO `sys_menu_items` (`parent_id`, `set_name`, `module`, `name`, `title_
 (0,'sa_ward_councilor_menu','sa_ward_councilor','ward-requests','_sa_ward_councilor_menu_requests_sys','_sa_ward_councilor_menu_requests','page.php?i=ward-requests','','','list-alt col-green3','',0,'','',0,2147483647,'','','',0,0,'',0,0,1,0,1,1,2),
 (0,'sa_ward_councilor_menu','sa_ward_councilor','ward-meetings','_sa_ward_councilor_menu_meetings_sys','_sa_ward_councilor_menu_meetings','page.php?i=ward-meetings','','','far calendar col-green3','',0,'','',0,2147483647,'','','',0,0,'',0,0,1,0,1,1,3),
 (0,'sa_ward_councilor_menu','sa_ward_councilor','ward-announcements','_sa_ward_councilor_menu_announcements_sys','_sa_ward_councilor_menu_announcements','page.php?i=ward-announcements','','','bullhorn col-green3','',0,'','',0,2147483647,'','','',0,0,'',0,0,1,0,1,1,4),
-(0,'sa_ward_councilor_menu','sa_ward_councilor','ward-my-requests','_sa_ward_councilor_menu_my_requests_sys','_sa_ward_councilor_menu_my_requests','page.php?i=my-ward-requests','','','far user col-green3','',0,'','',0,2147483644,'','','',0,0,'',0,0,1,0,1,1,5),
-(0,'sa_ward_councilor_menu','sa_ward_councilor','ward-manage','_sa_ward_councilor_menu_manage_sys','_sa_ward_councilor_menu_manage','page.php?i=ward-manage','','','cog col-green3','',0,'','',0,2752,'','','',0,0,'',0,0,1,0,1,1,6);
+(0,'sa_ward_councilor_menu','sa_ward_councilor','ward-my-requests','_sa_ward_councilor_menu_my_requests_sys','_sa_ward_councilor_menu_my_requests','page.php?i=my-ward-requests','','','far user col-green3','',0,'','',0,2147483647,'','','',0,0,'',0,0,1,0,1,1,5),
+(0,'sa_ward_councilor_menu','sa_ward_councilor','ward-manage','_sa_ward_councilor_menu_manage_sys','_sa_ward_councilor_menu_manage','page.php?i=ward-manage','','','cog col-green3','',0,'','',0,2147483647,'','','',0,0,'',0,0,1,0,1,1,6);
 
 -- =====================================================
 -- LANGUAGE STRINGS
@@ -357,51 +294,36 @@ VALUES
   ('sa_ward_councilor', 'edit own entry',   NULL, '_acl_txt_sa_ward_councilor_edit_own_entry',   '', 0, ''),
   ('sa_ward_councilor', 'edit any entry',   NULL, '_acl_txt_sa_ward_councilor_edit_any_entry',   '', 0, ''),
   ('sa_ward_councilor', 'delete own entry', NULL, '_acl_txt_sa_ward_councilor_delete_own_entry', '', 0, ''),
-  ('sa_ward_councilor', 'delete any entry', NULL, '_acl_txt_sa_ward_councilor_delete_any_entry', '', 0, ''),
-  ('sa_ward_councilor', 'approve entry',   NULL, '_acl_txt_sa_ward_councilor_approve_entry',   '', 0, '');
+  ('sa_ward_councilor', 'delete any entry', NULL, '_acl_txt_sa_ward_councilor_delete_any_entry', '', 0, '');
 
--- Grant Standard members basic content rights
+-- Grant Standard members (level 3) basic content rights
 INSERT INTO `sys_acl_matrix` (`IDLevel`, `IDAction`)
-SELECT l.ID, a.ID FROM sys_acl_levels l, sys_acl_actions a
-WHERE a.Module = 'sa_ward_councilor'
-AND a.Name IN ('view entry', 'create entry', 'edit own entry', 'delete own entry')
-AND l.Name IN ('Standard', '_adm_prm_txt_level_standard');
+SELECT 3, `ID` FROM `sys_acl_actions`
+WHERE `Module` = 'sa_ward_councilor'
+AND `Name` IN ('view entry', 'create entry', 'edit own entry', 'delete own entry');
 
--- Grant Moderators full content rights
+-- Grant Moderators (level 5) full content rights
 INSERT INTO `sys_acl_matrix` (`IDLevel`, `IDAction`)
-SELECT l.ID, a.ID FROM sys_acl_levels l, sys_acl_actions a
-WHERE a.Module = 'sa_ward_councilor'
-AND l.Name IN ('Moderator', '_adm_prm_txt_level_moderator');
+SELECT 5, `ID` FROM `sys_acl_actions`
+WHERE `Module` = 'sa_ward_councilor';
 
--- Grant Administrators full content rights
+-- Grant Administrators (level 8) full content rights
 INSERT INTO `sys_acl_matrix` (`IDLevel`, `IDAction`)
-SELECT l.ID, a.ID FROM sys_acl_levels l, sys_acl_actions a
-WHERE a.Module = 'sa_ward_councilor'
-AND l.Name IN ('Administrator', '_adm_prm_txt_level_administrator');
+SELECT 8, `ID` FROM `sys_acl_actions`
+WHERE `Module` = 'sa_ward_councilor';
 
--- Grant Councillors full content rights
+-- Grant Councillor (level 12) full content rights
 INSERT INTO `sys_acl_matrix` (`IDLevel`, `IDAction`)
-SELECT l.ID, a.ID FROM sys_acl_levels l, sys_acl_actions a
-WHERE a.Module = 'sa_ward_councilor'
-AND l.Name LIKE '%Councillor%';
+SELECT 12, `ID` FROM `sys_acl_actions`
+WHERE `Module` = 'sa_ward_councilor';
 
--- Grant Leadership full content rights
+-- Grant Leadership (level 10) full content rights
 INSERT INTO `sys_acl_matrix` (`IDLevel`, `IDAction`)
-SELECT l.ID, a.ID FROM sys_acl_levels l, sys_acl_actions a
-WHERE a.Module = 'sa_ward_councilor'
-AND l.Name LIKE '%Leadership%';
+SELECT 10, `ID` FROM `sys_acl_actions`
+WHERE `Module` = 'sa_ward_councilor';
 -- ────────────────────────────────────────────────────────────────────────────
 
--- ─── Timeline: Register content info object ─────────────────────────────────
-INSERT INTO `sys_objects_content_info`
-  (`name`, `title`, `alert_unit`, `alert_action_add`, `alert_action_update`, `alert_action_delete`, `class_name`, `class_file`)
-VALUES
-  ('sa_ward_councilor', '_sa_ward_councilor_content_info', 'sa_ward_councilor', 'added', 'edited', 'deleted', '', '');
-
--- NOTE: bx_timeline_handlers, sys_alerts, and bx_notifications_handlers are NOT inserted here.
--- They are registered automatically via serviceGetTimelineData() when the module is enabled
--- through the relation_handlers mechanism (bx_timeline on_enable => add_handlers).
--- ────────────────────────────────────────────────────────────────────────────
+-- ─── Privacy: Register visibility objects ───────────────────────────────────
 INSERT INTO `sys_objects_privacy`
   (`object`, `module`, `action`, `title`, `default_group`, `spaces`,
    `table`, `table_field_id`, `table_field_author`, `override_class_name`, `override_class_file`)

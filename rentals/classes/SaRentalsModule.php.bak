@@ -1,0 +1,363 @@
+<?php defined('BX_DOL') or die('hack attempt');
+
+bx_import('BxDolModule');
+
+class SaRentalsModule extends BxDolModule
+{
+    function __construct(&$aModule)
+    {
+        parent::__construct($aModule);
+    }
+
+    // ── Listings page ──────────────────────────────────────────────────────────
+    function serviceGetListingsBlock()
+    {
+        $this->_oTemplate->addCss(array('main.css'));
+        $aFilters = array();
+        if (!empty($_GET['province'])) $aFilters['province'] = bx_process_input(bx_get('province'));
+        if (!empty($_GET['type']))     $aFilters['type']     = bx_process_input(bx_get('type'));
+        if (isset($_GET['bedrooms']) && $_GET['bedrooms'] !== '') $aFilters['bedrooms'] = (int)$_GET['bedrooms'];
+        $aFilters['featured_first'] = true;
+        $aListings = $this->_oDb->getListings($aFilters);
+
+        $sFilter = '<div class="sar-filters"><form method="get">
+            <select name="province">
+                <option value="">All Provinces</option>
+                <option value="Gauteng"' . ((isset($aFilters['province']) && $aFilters['province'] == 'Gauteng') ? ' selected' : '') . '>Gauteng</option>
+                <option value="Western Cape"' . ((isset($aFilters['province']) && $aFilters['province'] == 'Western Cape') ? ' selected' : '') . '>Western Cape</option>
+                <option value="KwaZulu-Natal">KwaZulu-Natal</option>
+                <option value="Eastern Cape">Eastern Cape</option>
+                <option value="Limpopo">Limpopo</option>
+                <option value="Mpumalanga">Mpumalanga</option>
+                <option value="North West">North West</option>
+                <option value="Free State">Free State</option>
+                <option value="Northern Cape">Northern Cape</option>
+            </select>
+            <select name="type">
+                <option value="">All Types</option>
+                <option value="room">Room</option>
+                <option value="house">House</option>
+                <option value="flat">Flat/Apartment</option>
+                <option value="backyard">Backyard Unit</option>
+                <option value="townhouse">Townhouse</option>
+            </select>
+            <select name="bedrooms">
+                <option value="">Any Beds</option>
+                <option value="1">1+ Bed</option>
+                <option value="2">2+ Beds</option>
+                <option value="3">3+ Beds</option>
+                <option value="4">4+ Beds</option>
+            </select>
+            <button type="submit">Filter</button>
+        </form></div>';
+
+        $sCta = '<div class="sar-cta"><a href="' . BX_DOL_URL_ROOT . 'page.php?i=create-rentals-listing" class="sar-btn-primary">' . _t('_sa_rentals_post_listing') . '</a></div>';
+
+        if (empty($aListings)) {
+            $sContent = '<div class="sar-empty"><p>' . _t('_sa_rentals_no_listings') . '</p></div>';
+        } else {
+            $sContent = '<div class="sar-grid">';
+            foreach ($aListings as $aItem) $sContent .= $this->_renderCard($aItem);
+            $sContent .= '</div>';
+        }
+        return '<div class="sar-wrap">' . $sFilter . $sCta . $sContent . '</div>';
+    }
+
+    // ── Detail page ────────────────────────────────────────────────────────────
+    function serviceGetListingDetailBlock()
+    {
+        $this->_oTemplate->addCss(array('main.css'));
+        $iId = (int)bx_get('id');
+        if (!$iId) return '<p>' . _t('_sa_rentals_not_found') . '</p>';
+        $a = $this->_oDb->getListing($iId);
+        if (!$a) return '<p>' . _t('_sa_rentals_not_found') . '</p>';
+
+        $this->_oDb->incrementViews($iId);
+
+        // Media gallery
+        $sGallery = '';
+        if (!empty($a['media_storage_ids'])) {
+            $oStorage = BxDolStorage::getObjectInstance('sa_rentals_files');
+            if ($oStorage) {
+                $sGallery = '<div class="sar-gallery">';
+                foreach (explode(',', $a['media_storage_ids']) as $sFileId) {
+                    $sFileId = trim($sFileId);
+                    if (!$sFileId) continue;
+                    $aFile = $oStorage->getFile((int)$sFileId);
+                    if (!$aFile) continue;
+                    $sUrl = $oStorage->getFileUrlById((int)$sFileId);
+                    $sMime = $aFile['mime_type'];
+                    if (strpos($sMime, 'video') !== false)
+                        $sGallery .= '<video src="' . bx_html_attribute($sUrl) . '" controls></video>';
+                    else
+                        $sGallery .= '<img src="' . bx_html_attribute($sUrl) . '" alt="' . bx_html_attribute($a['title']) . '">';
+                }
+                $sGallery .= '</div>';
+            }
+        }
+
+        // Specs
+        $aSpecItems = array();
+        if ($a['bedrooms'])           $aSpecItems[] = array('Bedrooms',    $a['bedrooms']);
+        if ($a['bathrooms'])          $aSpecItems[] = array('Bathrooms',   $a['bathrooms']);
+        if ($a['lease_term'])         $aSpecItems[] = array('Lease',       $a['lease_term']);
+        if ($a['deposit_zar'] > 0)    $aSpecItems[] = array('Deposit',     'R ' . number_format((float)$a['deposit_zar'], 2));
+        if (!empty($a['available_from'])) $aSpecItems[] = array('Available', date('d M Y', strtotime($a['available_from'])));
+        $aSpecItems[] = array('Furnished', ucfirst(str_replace('-', ' ', $a['furnished'])));
+        $aSpecItems[] = array('Parking',   $a['parking'] ? 'Yes' : 'No');
+        $aSpecItems[] = array('Pets',      $a['pets_allowed'] ? 'Allowed' : 'No pets');
+        $aSpecItems[] = array('Utilities', $a['utilities_included'] ? 'Included' : 'Not included');
+        $aSpecItems[] = array('Electricity', $a['prepaid_electricity'] ? 'Prepaid meter' : 'Conventional');
+        if ($a['wifi_available'])     $aSpecItems[] = array('WiFi', 'Available');
+
+        $sSpecs = '<div class="sar-specs">';
+        foreach ($aSpecItems as $aS)
+            $sSpecs .= '<div class="sar-spec-item"><strong>' . htmlspecialchars($aS[0]) . '</strong>' . htmlspecialchars($aS[1]) . '</div>';
+        $sSpecs .= '</div>';
+
+        // Contact block
+        $sContact = '<div class="sar-contact"><h3>' . _t('_sa_rentals_contact_landlord') . '</h3>';
+        if (!empty($a['contact_phone']))    $sContact .= '<p>&#128222; <a href="tel:' . bx_html_attribute($a['contact_phone']) . '">' . htmlspecialchars($a['contact_phone']) . '</a></p>';
+        if (!empty($a['contact_whatsapp'])) $sContact .= '<p>&#128241; <a href="https://wa.me/' . preg_replace('/[^0-9]/', '', $a['contact_whatsapp']) . '" target="_blank">WhatsApp: ' . htmlspecialchars($a['contact_whatsapp']) . '</a></p>';
+        if (!empty($a['contact_email']))    $sContact .= '<p>&#9993; <a href="mailto:' . bx_html_attribute($a['contact_email']) . '">' . htmlspecialchars($a['contact_email']) . '</a></p>';
+        if (!empty($a['contact']))          $sContact .= '<p>' . htmlspecialchars($a['contact']) . '</p>';
+        $sContact .= '</div>';
+
+        $sFeatured = $a['featured'] ? '<span class="sar-featured">&#11088; Featured</span>' : '';
+        $sGroupTag = ($a['group_id'] > 0) ? '<span class="sar-group-tag">&#128101; Community Listing</span>' : '';
+
+        return '<div class="sar-detail">' .
+            $sGallery .
+            '<h1>' . htmlspecialchars($a['title']) . $sFeatured . '</h1>' .
+            $sGroupTag .
+            '<div class="sar-meta">
+                <span class="sar-card-badge">' . htmlspecialchars($a['property_type']) . '</span>
+                <span class="sar-price">R ' . number_format((float)$a['rent_zar'], 2) . ' /month</span>
+            </div>' .
+            '<div class="sar-location">&#128205; ' . htmlspecialchars($a['address']) . ', ' . htmlspecialchars($a['city']) . ', ' . htmlspecialchars($a['province']) . '</div>' .
+            $sSpecs .
+            '<div class="sar-desc">' . nl2br(htmlspecialchars($a['description'])) . '</div>' .
+            $sContact .
+            '<a href="' . BX_DOL_URL_ROOT . 'page.php?i=rentals-listings" class="sar-back">&larr; ' . _t('_sa_rentals_back') . '</a>' .
+            '</div>';
+    }
+
+    // ── Create listing page ────────────────────────────────────────────────────
+    function serviceGetCreateListingBlock()
+    {
+        $this->_oTemplate->addCss(array('main.css'));
+        $iUserId = bx_get_logged_profile_id();
+        if (!$iUserId) return '<p>' . _t('_sa_rentals_login_required') . '</p>';
+        $sMsg = '';
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $aData = array(
+                'title'               => bx_process_input(isset($_POST['title']) ? $_POST['title'] : '', BX_DATA_TEXT),
+                'description'         => bx_process_input(isset($_POST['description']) ? $_POST['description'] : '', BX_DATA_TEXT),
+                'property_type'       => bx_process_input(isset($_POST['property_type']) ? $_POST['property_type'] : '', BX_DATA_TEXT),
+                'province'            => bx_process_input(isset($_POST['province']) ? $_POST['province'] : '', BX_DATA_TEXT),
+                'city'                => bx_process_input(isset($_POST['city']) ? $_POST['city'] : '', BX_DATA_TEXT),
+                'address'             => bx_process_input(isset($_POST['address']) ? $_POST['address'] : '', BX_DATA_TEXT),
+                'rent_zar'            => bx_process_input(isset($_POST['rent_zar']) ? $_POST['rent_zar'] : '', BX_DATA_TEXT),
+                'deposit_zar'         => bx_process_input(isset($_POST['deposit_zar']) ? $_POST['deposit_zar'] : '', BX_DATA_TEXT),
+                'contact'             => bx_process_input(isset($_POST['contact']) ? $_POST['contact'] : '', BX_DATA_TEXT),
+                'contact_phone'       => bx_process_input(isset($_POST['contact_phone']) ? $_POST['contact_phone'] : '', BX_DATA_TEXT),
+                'contact_whatsapp'    => bx_process_input(isset($_POST['contact_whatsapp']) ? $_POST['contact_whatsapp'] : '', BX_DATA_TEXT),
+                'contact_email'       => bx_process_input(isset($_POST['contact_email']) ? $_POST['contact_email'] : '', BX_DATA_TEXT),
+                'available_from'      => bx_process_input(isset($_POST['available_from']) ? $_POST['available_from'] : '', BX_DATA_TEXT),
+                'lease_term'          => bx_process_input(isset($_POST['lease_term']) ? $_POST['lease_term'] : '', BX_DATA_TEXT),
+                'bedrooms'            => bx_process_input(isset($_POST['bedrooms']) ? $_POST['bedrooms'] : 0, BX_DATA_INT),
+                'bathrooms'           => bx_process_input(isset($_POST['bathrooms']) ? $_POST['bathrooms'] : 0, BX_DATA_INT),
+                'parking'             => !empty($_POST['parking']) ? 1 : 0,
+                'pets_allowed'        => !empty($_POST['pets_allowed']) ? 1 : 0,
+                'furnished'           => bx_process_input(isset($_POST['furnished']) ? $_POST['furnished'] : '', BX_DATA_TEXT),
+                'utilities_included'  => !empty($_POST['utilities_included']) ? 1 : 0,
+                'prepaid_electricity' => !empty($_POST['prepaid_electricity']) ? 1 : 0,
+                'wifi_available'      => !empty($_POST['wifi_available']) ? 1 : 0,
+                'security_features'   => bx_process_input(isset($_POST['security_features']) ? $_POST['security_features'] : '', BX_DATA_TEXT),
+                'group_id'            => (int)(isset($_POST['group_id']) ? $_POST['group_id'] : 0),
+                'author_id'           => $iUserId,
+            );
+            if (empty($aData['title']) || empty($aData['rent_zar'])) {
+                $sMsg = '<div class="sar-error">' . _t('_sa_rentals_error_required') . '</div>';
+            } else {
+                $this->_oDb->addListing($aData);
+                $iListingId = $this->_oDb->getLastInsertId();
+
+                // Handle media uploads
+                if (!empty($_FILES['media']['name'][0])) {
+                    $oStorage = BxDolStorage::getObjectInstance('sa_rentals_files');
+                    if ($oStorage) {
+                        $aFileIds = array();
+                        foreach ($_FILES['media']['name'] as $k => $sName) {
+                            if (empty($sName)) continue;
+                            $aFile = array(
+                                'name'     => $_FILES['media']['name'][$k],
+                                'type'     => $_FILES['media']['type'][$k],
+                                'tmp_name' => $_FILES['media']['tmp_name'][$k],
+                                'error'    => $_FILES['media']['error'][$k],
+                                'size'     => $_FILES['media']['size'][$k],
+                            );
+                            $iFileId = $oStorage->storeFileFromForm($aFile, false, $iUserId);
+                            if ($iFileId) $aFileIds[] = $iFileId;
+                        }
+                        if (!empty($aFileIds))
+                            $this->_oDb->updateListing($iListingId, array('media_storage_ids' => implode(',', $aFileIds)));
+                    }
+                }
+
+                // Fire alert — timeline + notifications hook via bx_groups
+                bx_alert('sa_rentals', 'listing_created', $iListingId, $iUserId, array(
+                    'group_id'   => $aData['group_id'],
+                    'title'      => $aData['title'],
+                    'province'   => $aData['province'],
+                    'rent_zar'   => $aData['rent_zar'],
+                    'object_url' => BX_DOL_URL_ROOT . 'page.php?i=view-rentals-listing&id=' . $iListingId,
+                ));
+
+                header('Location: ' . BX_DOL_URL_ROOT . 'page.php?i=rentals-listings');
+                exit;
+            }
+        }
+
+        return $sMsg . $this->_buildCreateForm();
+    }
+
+    // ── My Listings ────────────────────────────────────────────────────────────
+    function serviceGetMyListingsBlock()
+    {
+        $this->_oTemplate->addCss(array('main.css'));
+        $iUserId = bx_get_logged_profile_id();
+        if (!$iUserId) return '<p>' . _t('_sa_rentals_login_required') . '</p>';
+        $aListings = $this->_oDb->getListings(array('author_id' => $iUserId, 'all_statuses' => true));
+        if (empty($aListings))
+            return '<div class="sar-empty"><p>' . _t('_sa_rentals_no_listings') . '</p>
+                <a href="' . BX_DOL_URL_ROOT . 'page.php?i=create-rentals-listing" class="sar-btn-primary">' . _t('_sa_rentals_post_listing') . '</a></div>';
+        $sOut = '<div class="sar-my-listings">';
+        foreach ($aListings as $aItem) $sOut .= $this->_renderCard($aItem, true);
+        return $sOut . '</div>';
+    }
+
+    // ── Internal helpers ───────────────────────────────────────────────────────
+    protected function _renderCard($a, $bOwner = false)
+    {
+        $sUrl     = BX_DOL_URL_ROOT . 'page.php?i=view-rentals-listing&id=' . (int)$a['id'];
+        $sFeatured = $a['featured'] ? '<span class="sar-featured">&#11088; Featured</span>' : '';
+        $sBeds    = $a['bedrooms'] ? '&#127968; ' . (int)$a['bedrooms'] . ' bed' : '';
+        $sBaths   = $a['bathrooms'] ? ' &bull; &#129509; ' . (int)$a['bathrooms'] . ' bath' : '';
+        $sAvail   = !empty($a['available_from']) ? '<div class="sar-card-avail">Available: ' . date('d M Y', strtotime($a['available_from'])) . '</div>' : '';
+        $sOwner   = $bOwner ? '<div class="sar-owner-actions"><span class="sar-status sar-status-' . $a['status'] . '">' . $a['status'] . '</span></div>' : '';
+        $sMeta    = ($sBeds || $sBaths) ? '<div class="sar-card-meta"><span>' . trim($sBeds . $sBaths, ' &bull; ') . '</span></div>' : '';
+        return '<div class="sar-card">
+            <div class="sar-card-badge">' . htmlspecialchars($a['property_type']) . '</div>' . $sFeatured . '
+            <h3><a href="' . $sUrl . '">' . htmlspecialchars($a['title']) . '</a></h3>
+            <div class="sar-card-location">&#128205; ' . htmlspecialchars($a['city']) . ', ' . htmlspecialchars($a['province']) . '</div>
+            <div class="sar-card-price">R ' . number_format((float)$a['rent_zar'], 2) . ' /month</div>
+            ' . $sMeta . $sAvail . $sOwner . '
+        </div>';
+    }
+
+    protected function _buildCreateForm()
+    {
+        $sProvinces = '<option value="">Select Province</option>
+            <option value="Gauteng">Gauteng</option>
+            <option value="Western Cape">Western Cape</option>
+            <option value="KwaZulu-Natal">KwaZulu-Natal</option>
+            <option value="Eastern Cape">Eastern Cape</option>
+            <option value="Limpopo">Limpopo</option>
+            <option value="Mpumalanga">Mpumalanga</option>
+            <option value="North West">North West</option>
+            <option value="Free State">Free State</option>
+            <option value="Northern Cape">Northern Cape</option>';
+
+        return '<div class="sar-form-wrap">
+        <form method="post" enctype="multipart/form-data" class="sar-form">
+
+        <div class="sar-form-section">
+            <h3>' . _t('_sa_rentals_section_basic') . '</h3>
+            <label>' . _t('_sa_rentals_field_title') . ' *<input type="text" name="title" required></label>
+            <div class="sar-form-row">
+                <label>' . _t('_sa_rentals_field_type') . '<select name="property_type">
+                    <option value="room">Room</option>
+                    <option value="house">House</option>
+                    <option value="flat">Flat/Apartment</option>
+                    <option value="backyard">Backyard Unit</option>
+                    <option value="townhouse">Townhouse</option>
+                </select></label>
+                <label>' . _t('_sa_rentals_field_province') . '<select name="province">' . $sProvinces . '</select></label>
+            </div>
+            <div class="sar-form-row">
+                <label>' . _t('_sa_rentals_field_city') . '<input type="text" name="city"></label>
+                <label>' . _t('_sa_rentals_field_address') . '<input type="text" name="address"></label>
+            </div>
+            <label>' . _t('_sa_rentals_field_description') . '<textarea name="description" rows="5"></textarea></label>
+        </div>
+
+        <div class="sar-form-section">
+            <h3>' . _t('_sa_rentals_section_pricing') . '</h3>
+            <div class="sar-form-row">
+                <label>' . _t('_sa_rentals_field_rent') . ' (ZAR) *<input type="number" name="rent_zar" step="0.01" required min="0"></label>
+                <label>' . _t('_sa_rentals_field_deposit') . ' (ZAR)<input type="number" name="deposit_zar" step="0.01" min="0"></label>
+            </div>
+            <div class="sar-form-row">
+                <label>' . _t('_sa_rentals_field_available') . '<input type="date" name="available_from"></label>
+                <label>' . _t('_sa_rentals_field_lease') . '<select name="lease_term">
+                    <option value="month-to-month">Month-to-Month</option>
+                    <option value="6 months">6 Months</option>
+                    <option value="12 months">12 Months</option>
+                    <option value="24 months">24 Months</option>
+                </select></label>
+            </div>
+        </div>
+
+        <div class="sar-form-section">
+            <h3>' . _t('_sa_rentals_section_details') . '</h3>
+            <div class="sar-form-row">
+                <label>' . _t('_sa_rentals_field_bedrooms') . '<select name="bedrooms">
+                    <option value="0">Studio/Bedsit</option>
+                    <option value="1">1 Bedroom</option>
+                    <option value="2">2 Bedrooms</option>
+                    <option value="3">3 Bedrooms</option>
+                    <option value="4">4+ Bedrooms</option>
+                </select></label>
+                <label>' . _t('_sa_rentals_field_bathrooms') . '<select name="bathrooms">
+                    <option value="1">1 Bathroom</option>
+                    <option value="2">2 Bathrooms</option>
+                    <option value="3">3+ Bathrooms</option>
+                </select></label>
+            </div>
+            <label>' . _t('_sa_rentals_field_furnished') . '<select name="furnished">
+                <option value="unfurnished">Unfurnished</option>
+                <option value="semi-furnished">Semi-Furnished</option>
+                <option value="fully-furnished">Fully Furnished</option>
+            </select></label>
+            <label>' . _t('_sa_rentals_field_security') . '<input type="text" name="security_features" placeholder="e.g. Alarm, electric fence, 24hr guard"></label>
+            <div class="sar-checkbox-row"><input type="checkbox" name="parking" value="1"><label>' . _t('_sa_rentals_field_parking') . '</label></div>
+            <div class="sar-checkbox-row"><input type="checkbox" name="pets_allowed" value="1"><label>' . _t('_sa_rentals_field_pets') . '</label></div>
+            <div class="sar-checkbox-row"><input type="checkbox" name="utilities_included" value="1"><label>' . _t('_sa_rentals_field_utilities') . '</label></div>
+            <div class="sar-checkbox-row"><input type="checkbox" name="prepaid_electricity" value="1"><label>' . _t('_sa_rentals_field_prepaid') . '</label></div>
+            <div class="sar-checkbox-row"><input type="checkbox" name="wifi_available" value="1"><label>' . _t('_sa_rentals_field_wifi') . '</label></div>
+        </div>
+
+        <div class="sar-form-section">
+            <h3>' . _t('_sa_rentals_section_contact') . '</h3>
+            <div class="sar-form-row">
+                <label>' . _t('_sa_rentals_field_phone') . '<input type="tel" name="contact_phone" placeholder="e.g. 071 234 5678"></label>
+                <label>' . _t('_sa_rentals_field_whatsapp') . '<input type="tel" name="contact_whatsapp" placeholder="e.g. 071 234 5678"></label>
+            </div>
+            <label>' . _t('_sa_rentals_field_email') . '<input type="email" name="contact_email"></label>
+            <label>' . _t('_sa_rentals_field_contact') . '<input type="text" name="contact" placeholder="Any additional contact info"></label>
+        </div>
+
+        <div class="sar-form-section">
+            <h3>' . _t('_sa_rentals_section_media') . '</h3>
+            <label>' . _t('_sa_rentals_field_media') . '
+                <input type="file" name="media[]" multiple accept="image/*,video/*">
+            </label>
+            <p style="font-size:12px;color:#666;">' . _t('_sa_rentals_media_hint') . '</p>
+        </div>
+
+        <button type="submit" class="sar-btn-primary">' . _t('_sa_rentals_submit') . '</button>
+        </form></div>';
+    }
+}

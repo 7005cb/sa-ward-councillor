@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources name="en" flag="gb" title="English">
+	<!-- Module Name -->
+	<string name="_sa_support_scheme"><![CDATA[Community Support Scheme]]></string>
+	
+	<!-- Admin Settings -->
+	<string name="_sa_support_scheme_adm_stg_cpt_type"><![CDATA[Community Support Scheme]]></string>
+	<string name="_sa_support_scheme_adm_stg_cpt_category_general"><![CDATA[General Settings]]></string>
+	
+	<!-- Settings Options -->
+	<string name="_sa_support_scheme_option_enabled"><![CDATA[Enable Community Support Scheme]]></string>
+	<string name="_sa_support_scheme_option_min_donation"><![CDATA[Minimum Donation Amount (ZAR)]]></string>
+	<string name="_sa_support_scheme_option_max_donation"><![CDATA[Maximum Donation Amount (ZAR)]]></string>
+	<string name="_sa_support_scheme_option_currency"><![CDATA[Currency]]></string>
+	
+	<!-- Welcome Message -->
+	<string name="_sa_support_scheme_welcome"><![CDATA[Welcome to the Community Support Scheme - Connecting those in need with willing donors in South Africa!]]></string>
+	
+	<!-- Pages -->
+	<string name="_sa_support_scheme_page_campaigns_sys"><![CDATA[Campaigns]]></string>
+	<string name="_sa_support_scheme_page_campaigns"><![CDATA[Community Support Campaigns]]></string>
+	<string name="_sa_support_scheme_page_campaign_sys"><![CDATA[Campaign Details]]></string>
+	<string name="_sa_support_scheme_page_campaign"><![CDATA[Campaign Details]]></string>
+	<string name="_sa_support_scheme_page_create_sys"><![CDATA[Create Campaign]]></string>
+	<string name="_sa_support_scheme_page_create"><![CDATA[Create a Campaign]]></string>
+	<string name="_sa_support_scheme_page_my_campaigns_sys"><![CDATA[My Campaigns]]></string>
+	<string name="_sa_support_scheme_page_my_campaigns"><![CDATA[My Campaigns]]></string>
+	
+	<!-- Blocks -->
+	<string name="_sa_support_scheme_block_campaigns"><![CDATA[Active Campaigns]]></string>
+	<string name="_sa_support_scheme_block_campaign_details"><![CDATA[Campaign Details]]></string>
+	<string name="_sa_support_scheme_block_donate"><![CDATA[Make a Donation]]></string>
+	<string name="_sa_support_scheme_block_create_campaign"><![CDATA[Create Campaign]]></string>
+	<string name="_sa_support_scheme_block_my_campaigns"><![CDATA[My Campaigns]]></string>
+	
+	<!-- Menu -->
+	<string name="_sa_support_scheme_menu_item_sys"><![CDATA[Support Scheme]]></string>
+	<string name="_sa_support_scheme_menu_item"><![CDATA[Community Support]]></string>
+	
+	<!-- Categories -->
+	<string name="_sa_support_scheme_category_food"><![CDATA[Food & Nutrition]]></string>
+	<string name="_sa_support_scheme_category_medical"><![CDATA[Medical & Healthcare]]></string>
+	<string name="_sa_support_scheme_category_education"><![CDATA[Education]]></string>
+	<string name="_sa_support_scheme_category_housing"><![CDATA[Housing & Shelter]]></string>
+	<string name="_sa_support_scheme_category_emergency"><![CDATA[Emergency Relief]]></string>
+	<string name="_sa_support_scheme_category_other"><![CDATA[Other]]></string>
+	
+	<!-- Form Labels -->
+	<string name="_sa_support_scheme_donation_amount"><![CDATA[Donation Amount (ZAR)]]></string>
+	<string name="_sa_support_scheme_donation_message"><![CDATA[Message of Support (Optional)]]></string>
+	<string name="_sa_support_scheme_donate_anonymously"><![CDATA[Donate anonymously]]></string>
+	<string name="_sa_support_scheme_donate_now"><![CDATA[Donate Now]]></string>
+	<string name="_sa_support_scheme_donation_amount_invalid"><![CDATA[Please enter a valid donation amount]]></string>
+	
+	<string name="_sa_support_scheme_campaign_title"><![CDATA[Campaign Title]]></string>
+	<string name="_sa_support_scheme_campaign_category"><![CDATA[Category]]></string>
+	<string name="_sa_support_scheme_goal_amount"><![CDATA[Fundraising Goal (ZAR)]]></string>
+	<string name="_sa_support_scheme_campaign_description"><![CDATA[Campaign Description]]></string>
+	<string name="_sa_support_scheme_beneficiary_name"><![CDATA[Beneficiary Name (Optional)]]></string>
+	<string name="_sa_support_scheme_beneficiary_story"><![CDATA[Beneficiary Story (Optional)]]></string>
+	<string name="_sa_support_scheme_end_date"><![CDATA[End Date]]></string>
+	<string name="_sa_support_scheme_create_campaign"><![CDATA[Create Campaign]]></string>
+	
+	<string name="_sa_support_scheme_campaign_title_invalid"><![CDATA[Title must be between 3 and 255 characters]]></string>
+	<string name="_sa_support_scheme_campaign_description_invalid"><![CDATA[Description must be between 10 and 5000 characters]]></string>
+	<string name="_sa_support_scheme_goal_amount_invalid"><![CDATA[Goal amount must be between 100 and 1,000,000]]></string>
+	
+	<!-- Messages -->
+	<string name="_sa_support_scheme_no_campaigns"><![CDATA[No campaigns found. Be the first to create one!]]></string>
+	<string name="_sa_support_scheme_campaign_not_found"><![CDATA[Campaign not found]]></string>
+	<string name="_sa_support_scheme_login_required"><![CDATA[Please log in to continue]]></string>
+	<string name="_sa_support_scheme_anonymous_donor"><![CDATA[Anonymous]]></string>
+	<string name="_sa_support_scheme_donation_success"><![CDATA[Thank you for your donation!]]></string>
+</resources>

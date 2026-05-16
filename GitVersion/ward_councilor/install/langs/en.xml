@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources name="en" flag="us" title="English">
+    <string name="_sa_ward_councilor"><![CDATA[Ward Councilor Portal]]></string>
+
+    <string name="_sa_ward_councilor_menu_item_sys"><![CDATA[Ward Councilor Portal]]></string>
+    <string name="_sa_ward_councilor_menu_item"><![CDATA[Ward Portal]]></string>
+    <string name="_sa_ward_councilor_menu_dashboard_sys"><![CDATA[Ward Portal]]></string>
+    <string name="_sa_ward_councilor_menu_dashboard"><![CDATA[Ward Portal]]></string>
+    <string name="_sa_ward_councilor_menu_requests_sys"><![CDATA[Service Requests]]></string>
+    <string name="_sa_ward_councilor_menu_requests"><![CDATA[Service Requests]]></string>
+    <string name="_sa_ward_councilor_menu_meetings_sys"><![CDATA[Meetings]]></string>
+    <string name="_sa_ward_councilor_menu_meetings"><![CDATA[Meetings]]></string>
+    <string name="_sa_ward_councilor_menu_announcements_sys"><![CDATA[Announcements]]></string>
+    <string name="_sa_ward_councilor_menu_announcements"><![CDATA[Announcements]]></string>
+    <string name="_sa_ward_councilor_menu_my_requests_sys"><![CDATA[My Requests]]></string>
+    <string name="_sa_ward_councilor_menu_my_requests"><![CDATA[My Requests]]></string>
+
+    <string name="_sa_ward_councilor_page_dashboard_sys"><![CDATA[Ward Councilor Dashboard]]></string>
+    <string name="_sa_ward_councilor_page_dashboard"><![CDATA[Ward Councilor Portal]]></string>
+    <string name="_sa_ward_councilor_page_requests_sys"><![CDATA[Service Requests]]></string>
+    <string name="_sa_ward_councilor_page_requests"><![CDATA[Service Requests]]></string>
+    <string name="_sa_ward_councilor_page_request_sys"><![CDATA[Service Request Details]]></string>
+    <string name="_sa_ward_councilor_page_request"><![CDATA[Service Request]]></string>
+    <string name="_sa_ward_councilor_page_create_request_sys"><![CDATA[Submit Service Request]]></string>
+    <string name="_sa_ward_councilor_page_create_request"><![CDATA[Submit Service Request]]></string>
+    <string name="_sa_ward_councilor_page_meetings_sys"><![CDATA[Ward Meetings]]></string>
+    <string name="_sa_ward_councilor_page_meetings"><![CDATA[Ward Meetings]]></string>
+    <string name="_sa_ward_councilor_page_meeting_sys"><![CDATA[Meeting Details]]></string>
+    <string name="_sa_ward_councilor_page_meeting"><![CDATA[Ward Meeting]]></string>
+    <string name="_sa_ward_councilor_page_create_meeting_sys"><![CDATA[Schedule Meeting]]></string>
+    <string name="_sa_ward_councilor_page_create_meeting"><![CDATA[Schedule Ward Meeting]]></string>
+    <string name="_sa_ward_councilor_page_announcements_sys"><![CDATA[Ward Announcements]]></string>
+    <string name="_sa_ward_councilor_page_announcements"><![CDATA[Ward Announcements]]></string>
+    <string name="_sa_ward_councilor_page_announcement_sys"><![CDATA[Announcement Details]]></string>
+    <string name="_sa_ward_councilor_page_announcement"><![CDATA[Announcement]]></string>
+    <string name="_sa_ward_councilor_page_create_announcement_sys"><![CDATA[Post Announcement]]></string>
+    <string name="_sa_ward_councilor_page_create_announcement"><![CDATA[Post Announcement]]></string>
+    <string name="_sa_ward_councilor_page_my_requests_sys"><![CDATA[My Service Requests]]></string>
+    <string name="_sa_ward_councilor_page_my_requests"><![CDATA[My Requests]]></string>
+
+    <string name="_sa_ward_councilor_block_dashboard"><![CDATA[Ward Councilor Dashboard]]></string>
+    <string name="_sa_ward_councilor_block_requests"><![CDATA[Service Requests]]></string>
+    <string name="_sa_ward_councilor_block_request_details"><![CDATA[Request Details]]></string>
+    <string name="_sa_ward_councilor_block_create_request"><![CDATA[Submit Request]]></string>
+    <string name="_sa_ward_councilor_block_meetings"><![CDATA[Ward Meetings]]></string>
+    <string name="_sa_ward_councilor_block_meeting_details"><![CDATA[Meeting Details]]></string>
+    <string name="_sa_ward_councilor_block_create_meeting"><![CDATA[Schedule Meeting]]></string>
+    <string name="_sa_ward_councilor_block_announcements"><![CDATA[Announcements]]></string>
+    <string name="_sa_ward_councilor_block_announcement_details"><![CDATA[Announcement Details]]></string>
+    <string name="_sa_ward_councilor_block_create_announcement"><![CDATA[Post Announcement]]></string>
+    <string name="_sa_ward_councilor_block_my_requests"><![CDATA[My Requests]]></string>
+</resources>
