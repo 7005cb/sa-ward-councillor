@@ -65,21 +65,36 @@ if($sAction === 'moderate_request') {
 }
 
 // Cascading community selector — returns JSON array of child spaces
+// parent_id is bx_spaces_data.id (content_id); parent_space stores sys_profiles.id,
+// so we convert before querying children. Children are returned as d.id (content_id)
+// so the join URL receives the correct id for join-space-profile.
 if($sAction === 'get_child_spaces') {
     header('Content-Type: application/json; charset=utf-8');
-    $iParentId = (int)bx_get('parent_id');
-    if(!$iParentId) {
+    $iContentId = (int)bx_get('parent_id');
+    if(!$iContentId) {
         echo json_encode(array());
         exit;
     }
     $oDb = BxDolDb::getInstance();
+    $iProfileId = (int)$oDb->getOne(
+        $oDb->prepare(
+            "SELECT p.`id` FROM `sys_profiles` p
+             WHERE p.`content_id` = ? AND p.`type` = 'bx_spaces' AND p.`status` = 'active'
+             LIMIT 1",
+            $iContentId
+        )
+    );
+    if(!$iProfileId) {
+        echo json_encode(array());
+        exit;
+    }
     $aSpaces = $oDb->getAll(
         $oDb->prepare(
-            "SELECT p.`id`, d.`space_name` AS `name` FROM `bx_spaces_data` d
+            "SELECT d.`id`, d.`space_name` AS `name` FROM `bx_spaces_data` d
              JOIN `sys_profiles` p ON p.`content_id` = d.`id` AND p.`type` = 'bx_spaces' AND p.`status` = 'active'
              WHERE d.`parent_space` = ? AND d.`status` = 'active'
              ORDER BY d.`space_name` ASC",
-            $iParentId
+            $iProfileId
         )
     );
     echo json_encode(is_array($aSpaces) ? $aSpaces : array());

@@ -429,7 +429,7 @@ class SaWardCouncilorModule extends BxDolModule
         $sOptions = '<option value="">Select Country...</option>';
         if(is_array($aCountries)) {
             foreach($aCountries as $aC) {
-                $sOptions .= '<option value="' . (int)$aC['profile_id'] . '">' . htmlspecialchars($aC['space_name']) . '</option>';
+                $sOptions .= '<option value="' . (int)$aC['id'] . '">' . htmlspecialchars($aC['space_name']) . '</option>';
             }
         }
 
