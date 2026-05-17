@@ -64,6 +64,28 @@ if($sAction === 'moderate_request') {
     exit;
 }
 
+// Cascading community selector — returns JSON array of child spaces
+if($sAction === 'get_child_spaces') {
+    header('Content-Type: application/json; charset=utf-8');
+    $iParentId = (int)bx_get('parent_id');
+    if(!$iParentId) {
+        echo json_encode(array());
+        exit;
+    }
+    $oDb = BxDolDb::getInstance();
+    $aSpaces = $oDb->getAll(
+        $oDb->prepare(
+            "SELECT p.`id`, d.`space_name` AS `name` FROM `bx_spaces_data` d
+             JOIN `sys_profiles` p ON p.`content_id` = d.`id` AND p.`type` = 'bx_spaces' AND p.`status` = 'active'
+             WHERE d.`parent_space` = ? AND d.`status` = 'active'
+             ORDER BY d.`space_name` ASC",
+            $iParentId
+        )
+    );
+    echo json_encode(is_array($aSpaces) ? $aSpaces : array());
+    exit;
+}
+
 $sOut = '';
 switch($sAction) {
     case 'get_space_summary_block':  $sOut = $oModule->serviceGetSpaceSummaryBlock();  break;

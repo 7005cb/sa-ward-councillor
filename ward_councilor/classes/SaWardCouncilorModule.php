@@ -173,7 +173,7 @@ class SaWardCouncilorModule extends BxDolModule
             
             ' . $sCouncilorInfo . '
             
-            ' . (!isLogged() && empty($iSpaceId) ? $this->_getCommunitySelector("dashboard") : '') . '
+            ' . (!isLogged() && empty($iSpaceId) ? $this->_getCommunityPrompt() : '') . '
             
             <div class="wc-stats-grid">
                 <div class="wc-stat-card">
@@ -415,6 +415,81 @@ class SaWardCouncilorModule extends BxDolModule
         return $sHtml;
     }
 
+    private function _getCommunityPrompt()
+    {
+        $oDb = BxDolDb::getInstance();
+
+        $aCountries = $oDb->getAll(
+            "SELECT d.`id`, d.`space_name`, p.`id` AS `profile_id` FROM `bx_spaces_data` d
+             JOIN `sys_profiles` p ON p.`content_id` = d.`id` AND p.`type` = 'bx_spaces' AND p.`status` = 'active'
+             WHERE d.`parent_space` = 0 AND d.`status` = 'active'
+             ORDER BY d.`space_name` ASC"
+        );
+
+        $sOptions = '<option value="">Select Country...</option>';
+        if(is_array($aCountries)) {
+            foreach($aCountries as $aC) {
+                $sOptions .= '<option value="' . (int)$aC['profile_id'] . '">' . htmlspecialchars($aC['space_name']) . '</option>';
+            }
+        }
+
+        $sUrl = BX_DOL_URL_ROOT . 'modules/sa/ward_councilor/request.php?action=get_child_spaces&parent_id=';
+
+        $sHtml  = '<div class="wc-community-prompt" style="text-align:center;padding:40px 20px;">';
+        $sHtml .= '<div style="font-size:48px;margin-bottom:16px;">&#127968;</div>';
+        $sHtml .= '<h3 style="margin:0 0 8px;">Find Your Community</h3>';
+        $sHtml .= '<p style="margin:0 0 20px;">Select your location to find your neighbourhood ward portal.</p>';
+        $sHtml .= '<div style="max-width:320px;margin:0 auto;">';
+        $sHtml .= '<select id="wc-sel-country" style="width:100%;padding:8px;margin-bottom:10px;" onchange="wcLoadChildren(this.value,\'wc-sel-province\')">';
+        $sHtml .= $sOptions;
+        $sHtml .= '</select>';
+        $sHtml .= '<select id="wc-sel-province" style="width:100%;padding:8px;margin-bottom:10px;" disabled onchange="wcLoadChildren(this.value,\'wc-sel-city\')">';
+        $sHtml .= '<option value="">Select Province...</option>';
+        $sHtml .= '</select>';
+        $sHtml .= '<select id="wc-sel-city" style="width:100%;padding:8px;margin-bottom:10px;" disabled onchange="wcLoadChildren(this.value,\'wc-sel-community\')">';
+        $sHtml .= '<option value="">Select City...</option>';
+        $sHtml .= '</select>';
+        $sHtml .= '<select id="wc-sel-community" style="width:100%;padding:8px;margin-bottom:10px;" disabled onchange="wcSelectCommunity(this.value)">';
+        $sHtml .= '<option value="">Select Community...</option>';
+        $sHtml .= '</select>';
+        $sHtml .= '<button onclick="wcJoinCommunity()" class="bx-btn bx-btn-primary" style="width:100%;margin-top:10px;">Join My Community</button>';
+        $sHtml .= '</div>';
+        $sHtml .= '<script>';
+        $sHtml .= 'var wcAjaxUrl = "' . $sUrl . '";';
+        $sHtml .= 'var iSelectedCommunity = 0;';
+        $sHtml .= 'function wcSelectCommunity(iId) {';
+        $sHtml .= '  iSelectedCommunity = iId;';
+        $sHtml .= '}';
+        $sHtml .= 'function wcLoadChildren(iParentId, sTargetId) {';
+        $sHtml .= '  if(!iParentId) return;';
+        $sHtml .= '  var oSel = document.getElementById(sTargetId);';
+        $sHtml .= '  oSel.disabled = true;';
+        $sHtml .= '  oSel.innerHTML = "<option>Loading...</option>";';
+        $sHtml .= '  fetch(wcAjaxUrl + iParentId)';
+        $sHtml .= '    .then(function(r){ return r.json(); })';
+        $sHtml .= '    .then(function(a) {';
+        $sHtml .= '      var sHtml = "<option value=\\"\\">Select...</option>";';
+        $sHtml .= '      if(a && a.length) {';
+        $sHtml .= '        a.forEach(function(o){ sHtml += "<option value=\\""+o.id+"\\">"+o.name+"</option>"; });';
+        $sHtml .= '      }';
+        $sHtml .= '      oSel.innerHTML = sHtml;';
+        $sHtml .= '      oSel.disabled = false;';
+        $sHtml .= '    });';
+        $sHtml .= '}';
+        $sHtml .= 'function wcJoinCommunity() {';
+        $sHtml .= '  var iId = iSelectedCommunity';
+        $sHtml .= '          || document.getElementById("wc-sel-city").value';
+        $sHtml .= '          || document.getElementById("wc-sel-province").value';
+        $sHtml .= '          || document.getElementById("wc-sel-country").value;';
+        $sHtml .= '  if(!iId) { alert("Please select your community from the list first."); return; }';
+        $sHtml .= '  window.location.href = "page.php?i=join-space-profile&id=" + iId;';
+        $sHtml .= '}';
+        $sHtml .= '</script>';
+        $sHtml .= '</div>';
+
+        return $sHtml;
+    }
+
 
 
     // =====================================================
@@ -475,7 +550,7 @@ class SaWardCouncilorModule extends BxDolModule
         }
         
         // Community selector for guests without space context
-        $sCommunitySelector = (!isLogged() && empty($iSpaceId)) ? $this->_getCommunitySelector("requests") : '';
+        $sCommunitySelector = (!isLogged() && empty($iSpaceId)) ? $this->_getCommunityPrompt() : '';
 
         return '<div class="wc-requests">
             <div class="wc-page-header">
