@@ -297,6 +297,23 @@ class SaWardCouncilorModule extends BxDolModule
             if($sType === 'bx_spaces') return $iProfileId;
         }
 
+        // 4. Auto-detect: logged-in member belongs to exactly one space
+        if(isLogged()) {
+            $iProfileId = (int)bx_get_logged_profile_id();
+            $oDb = BxDolDb::getInstance();
+            $aSpaces = $oDb->getAll(
+                $oDb->prepare(
+                    "SELECT `content` FROM `bx_spaces_fans`
+                     WHERE `initiator` = ? AND `mutual` = 1
+                     LIMIT 2",
+                    $iProfileId
+                )
+            );
+            if(count($aSpaces) === 1) {
+                return (int)$aSpaces[0]['content'];
+            }
+        }
+
         return null;
     }
 
