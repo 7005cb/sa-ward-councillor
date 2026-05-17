@@ -482,7 +482,7 @@ class SaWardCouncilorModule extends BxDolModule
         $sHtml .= '          || document.getElementById("wc-sel-province").value';
         $sHtml .= '          || document.getElementById("wc-sel-country").value;';
         $sHtml .= '  if(!iId) { alert("Please select your community from the list first."); return; }';
-        $sHtml .= '  window.location.href = "page.php?i=join-space-profile&id=" + iId;';
+        $sHtml .= '  window.location.href = "page.php?i=view-space-profile&profile_id=" + iId;';
         $sHtml .= '}';
         $sHtml .= '</script>';
         $sHtml .= '</div>';
