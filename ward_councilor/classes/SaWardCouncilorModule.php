@@ -173,7 +173,7 @@ class SaWardCouncilorModule extends BxDolModule
             
             ' . $sCouncilorInfo . '
             
-            ' . (!isLogged() && empty($iSpaceId) ? $this->_getCommunityPrompt() : '') . '
+            ' . (empty($iSpaceId) ? $this->_getCommunityPrompt() : '') . '
             
             <div class="wc-stats-grid">
                 <div class="wc-stat-card">
@@ -297,7 +297,7 @@ class SaWardCouncilorModule extends BxDolModule
             if($sType === 'bx_spaces') return $iProfileId;
         }
 
-        return 0;
+        return null;
     }
 
     /**
@@ -550,7 +550,7 @@ class SaWardCouncilorModule extends BxDolModule
         }
         
         // Community selector for guests without space context
-        $sCommunitySelector = (!isLogged() && empty($iSpaceId)) ? $this->_getCommunityPrompt() : '';
+        $sCommunitySelector = empty($iSpaceId) ? $this->_getCommunityPrompt() : '';
 
         return '<div class="wc-requests">
             <div class="wc-page-header">
