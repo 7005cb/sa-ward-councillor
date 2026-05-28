@@ -789,6 +789,33 @@ class SaWardCouncilorModule extends BxDolModule
 <a href="' . BX_DOL_URL_ROOT . 'page.php?i=create-account" class="bx-btn">Register</a>
 </div>';
 
+        // Block logged-in users who have not joined the current space/community.
+        $iSpaceId = $this->_getCurrentSpaceId();
+        if($iSpaceId) {
+            $iProfileId = (int)bx_get_logged_profile_id();
+            $oDb = BxDolDb::getInstance();
+            $bIsMember = (bool)$oDb->getOne(
+                $oDb->prepare(
+                    "SELECT COUNT(*) FROM bx_spaces_fans
+                     WHERE initiator = ?
+                     AND content = ?
+                     AND mutual = 1",
+                    $iProfileId, $iSpaceId
+                )
+            );
+            if(!$bIsMember) {
+                $oSpace = BxDolProfile::getInstance($iSpaceId);
+                $sSpaceName = $oSpace ? $oSpace->getDisplayName() : 'this community';
+                return '<div class="wc-login-required" style="text-align:center;padding:20px;">
+            <p>You need to be a member of ' . htmlspecialchars($sSpaceName) . '
+            to submit a ward service request.</p>
+            <a href="' . BX_DOL_URL_ROOT . 'page.php?i=view-space-profile&profile_id='
+            . $iSpaceId . '" class="bx-btn bx-btn-primary">
+            Join ' . htmlspecialchars($sSpaceName) . ' →</a>
+        </div>';
+            }
+        }
+
         $sMessage = '';
         
         if($_SERVER['REQUEST_METHOD'] === 'POST') {
