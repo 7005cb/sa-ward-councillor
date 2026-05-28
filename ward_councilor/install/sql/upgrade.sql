@@ -236,6 +236,54 @@ VALUES
      0, '',
      0, 1, 1, 0, 3);
 
+-- ── Create Request page/block backfill ────────────────────────
+-- Runtime membership enforcement lives in serviceGetCreateRequestBlock().
+INSERT INTO `sys_objects_page`
+    (`author`, `added`, `object`, `uri`, `title_system`, `title`, `module`,
+     `cover`, `cover_image`, `cover_title`, `type_id`, `layout_id`, `sticky_columns`,
+     `submenu`, `visible_for_levels`, `visible_for_levels_editable`, `url`,
+     `content_info`, `meta_title`, `meta_description`, `meta_keywords`, `meta_robots`,
+     `cache_lifetime`, `cache_editable`, `inj_head`, `inj_footer`, `config_api`,
+     `deletable`, `override_class_name`, `override_class_file`)
+SELECT
+    0, UNIX_TIMESTAMP(), 'sa_ward_councilor_create_request', 'create-ward-request',
+    '_sa_ward_councilor_page_create_request_sys', '_sa_ward_councilor_page_create_request',
+    'sa_ward_councilor', 0, 0, '', 1, 5, 0, '', 2147483647, 1,
+    'page.php?i=create-ward-request', '', '', '', '', '', 0, 1, '', '', '', 0, '', ''
+FROM DUAL
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM `sys_objects_page`
+    WHERE `object` = 'sa_ward_councilor_create_request'
+       OR `uri` = 'create-ward-request'
+);
+
+INSERT INTO `sys_pages_blocks`
+    (`object`, `cell_id`, `module`,
+     `title_system`, `title`,
+     `designbox_id`, `class`, `submenu`, `tabs`, `async`,
+     `visible_for_levels`, `hidden_on`,
+     `type`, `content`,
+     `content_empty`, `text`, `text_updated`, `help`,
+     `cache_lifetime`, `config_api`,
+     `deletable`, `copyable`, `active`, `active_api`, `order`)
+SELECT
+    'sa_ward_councilor_create_request', 1, 'sa_ward_councilor',
+    '', '_sa_ward_councilor_block_create_request',
+    11, '', '', 0, 0,
+    2147483647, '',
+    'service', 'a:2:{s:6:"module";s:17:"sa_ward_councilor";s:6:"method";s:24:"get_create_request_block";}',
+    '', '', 0, '',
+    0, '',
+    0, 1, 1, 0, 1
+FROM DUAL
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM `sys_pages_blocks`
+    WHERE `object` = 'sa_ward_councilor_create_request'
+      AND `module` = 'sa_ward_councilor'
+);
+
 -- ─── Upgrade: fix menu visible_for_levels ────────────────────────
 UPDATE `sys_menu_items` SET `visible_for_levels` = 2752
 WHERE `module` = 'sa_ward_councilor' AND `name` = 'ward-manage';

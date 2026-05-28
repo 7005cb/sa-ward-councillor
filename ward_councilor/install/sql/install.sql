@@ -192,6 +192,7 @@ INSERT INTO `sys_pages_blocks` (`object`, `cell_id`, `module`, `title_system`, `
 ('sa_ward_councilor_request', 1, 'sa_ward_councilor', '', '_sa_ward_councilor_block_request_details', 11, '', '', 0, 0, 2147483647, '', 'service', 'a:2:{s:6:"module";s:17:"sa_ward_councilor";s:6:"method";s:25:"get_request_details_block";}', '', '', 0, '', 0, '', 0, 1, 1, 0, 1);
 
 -- Create Request Block
+-- Runtime membership enforcement lives in serviceGetCreateRequestBlock().
 INSERT INTO `sys_pages_blocks` (`object`, `cell_id`, `module`, `title_system`, `title`, `designbox_id`, `class`, `submenu`, `tabs`, `async`, `visible_for_levels`, `hidden_on`, `type`, `content`, `content_empty`, `text`, `text_updated`, `help`, `cache_lifetime`, `config_api`, `deletable`, `copyable`, `active`, `active_api`, `order`) VALUES
 ('sa_ward_councilor_create_request', 1, 'sa_ward_councilor', '', '_sa_ward_councilor_block_create_request', 11, '', '', 0, 0, 2147483647, '', 'service', 'a:2:{s:6:"module";s:17:"sa_ward_councilor";s:6:"method";s:24:"get_create_request_block";}', '', '', 0, '', 0, '', 0, 1, 1, 0, 1);
 
