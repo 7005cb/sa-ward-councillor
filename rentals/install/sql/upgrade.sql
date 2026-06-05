@@ -82,3 +82,55 @@ CREATE TABLE IF NOT EXISTS `sa_rentals_files` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `remote_id` (`remote_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ─── Upgrade: add pending status to enum ─────────────────────────────────────
+ALTER TABLE `sa_rentals_listings`
+  MODIFY COLUMN `status` enum('available','hold','booked','taken','pending') NOT NULL DEFAULT 'available';
+
+-- ─── Upgrade: sys_objects_privacy ────────────────────────────────────────────
+INSERT IGNORE INTO `sys_objects_privacy`
+  (`object`, `module`, `action`, `allow_view_to`, `allow_view_to_editable`, `allow_post_to`, `allow_post_to_editable`)
+VALUES
+  ('sa_rentals_view', 'sa_rentals', 'view', 2147483647, 1, 2147483647, 1);
+
+-- ─── Upgrade: new ACL actions ────────────────────────────────────────────────
+INSERT IGNORE INTO `sys_acl_actions`
+  (`Module`, `Name`, `AdditionalParamName`, `Title`, `Desc`, `Countable`, `DisabledForLevels`)
+VALUES
+  ('sa_rentals', 'approve entry', NULL, '_acl_txt_sa_rentals_approve_entry', '', 0, ''),
+  ('sa_rentals', 'feature entry', NULL, '_acl_txt_sa_rentals_feature_entry', '', 0, '');
+
+-- Grant approve to moderators (5), feature+approve to admins (8)
+INSERT IGNORE INTO `sys_acl_matrix` (`IDLevel`, `IDAction`)
+SELECT 5, `ID` FROM `sys_acl_actions`
+WHERE `Module` = 'sa_rentals' AND `Name` = 'approve entry';
+
+INSERT IGNORE INTO `sys_acl_matrix` (`IDLevel`, `IDAction`)
+SELECT 8, `ID` FROM `sys_acl_actions`
+WHERE `Module` = 'sa_rentals' AND `Name` IN ('approve entry', 'feature entry');
+
+-- ─── Upgrade: feature toggles ────────────────────────────────────────────────
+INSERT IGNORE INTO `sys_options`
+  (`name`, `value`, `category_id`, `caption`, `type`, `extra`, `check`, `check_params`, `check_error`, `order`)
+VALUES
+  ('sa_rentals_require_tenant_reg',  'on',  0, '_sa_rentals_opt_require_tenant_reg',  'checkbox', '', '', '', '', 1),
+  ('sa_rentals_agent_verification',  'on',  0, '_sa_rentals_opt_agent_verification',  'checkbox', '', '', '', '', 2),
+  ('sa_rentals_blacklisting',        '',    0, '_sa_rentals_opt_blacklisting',         'checkbox', '', '', '', '', 3),
+  ('sa_rentals_show_banners',        '',    0, '_sa_rentals_opt_show_banners',         'checkbox', '', '', '', '', 4),
+  ('sa_rentals_moderation',          '',    0, '_sa_rentals_opt_moderation',           'checkbox', '', '', '', '', 5);
+
+-- ─── Upgrade: admin page + block ─────────────────────────────────────────────
+INSERT INTO `sys_objects_page`
+  (`author`,`added`,`object`,`uri`,`title_system`,`title`,`module`,`cover`,`cover_image`,`cover_title`,`type_id`,`layout_id`,`sticky_columns`,`submenu`,`visible_for_levels`,`visible_for_levels_editable`,`url`,`content_info`,`meta_title`,`meta_description`,`meta_keywords`,`meta_robots`,`cache_lifetime`,`cache_editable`,`inj_head`,`inj_footer`,`config_api`,`deletable`,`override_class_name`,`override_class_file`)
+SELECT
+  0,UNIX_TIMESTAMP(),'sa_rentals_admin','sa-rentals-admin','_sa_rentals_page_admin_sys','_sa_rentals_page_admin','sa_rentals',0,0,'',1,5,0,'',36,1,'page.php?i=sa-rentals-admin','','','','','',0,1,'','','',0,'',''
+FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM `sys_objects_page` WHERE `object` = 'sa_rentals_admin');
+
+-- Serialized: sa_rentals=10, get_admin_listings_block=24
+INSERT INTO `sys_pages_blocks`
+  (`object`,`cell_id`,`module`,`title_system`,`title`,`designbox_id`,`class`,`submenu`,`tabs`,`async`,`visible_for_levels`,`hidden_on`,`type`,`content`,`content_empty`,`text`,`text_updated`,`help`,`cache_lifetime`,`config_api`,`deletable`,`copyable`,`active`,`active_api`,`order`)
+SELECT
+  'sa_rentals_admin',1,'sa_rentals','','_sa_rentals_block_admin',11,'','',0,0,36,'','service','a:2:{s:6:"module";s:10:"sa_rentals";s:6:"method";s:24:"get_admin_listings_block";}','','',0,'',0,'',0,1,1,0,1
+FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM `sys_pages_blocks` WHERE `object` = 'sa_rentals_admin' AND `module` = 'sa_rentals');

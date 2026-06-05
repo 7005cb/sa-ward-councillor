@@ -121,6 +121,25 @@ CREATE TABLE IF NOT EXISTS `sa_ward_councilor_info` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- =====================================================
+-- COMMUNITY REQUESTS (members ask for a new community)
+-- =====================================================
+CREATE TABLE IF NOT EXISTS `sa_ward_councilor_community_requests` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `author_id` int(11) NOT NULL,
+  `community_name` varchar(255) NOT NULL,
+  `city` varchar(255) NOT NULL,
+  `province` varchar(100) NOT NULL,
+  `reason` text,
+  `status` enum('pending','approved','rejected') NOT NULL DEFAULT 'pending',
+  `admin_notes` text,
+  `created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `author_id` (`author_id`),
+  KEY `status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =====================================================
 -- PAGES
 -- =====================================================
 

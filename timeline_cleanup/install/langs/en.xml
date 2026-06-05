@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources name="en" flag="us" title="English">
+    <string name="_sa_timeline_cleanup"><![CDATA[Timeline Cleanup Tool]]></string>
+
+    <string name="_sa_timeline_cleanup_menu_item_sys"><![CDATA[Timeline Cleanup]]></string>
+    <string name="_sa_timeline_cleanup_menu_item"><![CDATA[Timeline Cleanup]]></string>
+
+    <string name="_sa_timeline_cleanup_page_sys"><![CDATA[Timeline Cleanup Tool]]></string>
+    <string name="_sa_timeline_cleanup_page"><![CDATA[Timeline Cleanup]]></string>
+
+    <string name="_sa_timeline_cleanup_days"><![CDATA[Delete posts older than (days)]]></string>
+    <string name="_sa_timeline_cleanup_batch"><![CDATA[Batch size]]></string>
+    <string name="_sa_timeline_cleanup_event_types"><![CDATA[Event types to clean]]></string>
+    <string name="_sa_timeline_cleanup_dry_run"><![CDATA[Dry run mode]]></string>
+    <string name="_sa_timeline_cleanup_dry_run_on"><![CDATA[ON — no deletions will be performed]]></string>
+    <string name="_sa_timeline_cleanup_dry_run_off"><![CDATA[OFF — deletions will be performed]]></string>
+    <string name="_sa_timeline_cleanup_run"><![CDATA[Run Cleanup]]></string>
+    <string name="_sa_timeline_cleanup_diagnostics"><![CDATA[Step 1: Diagnostics]]></string>
+    <string name="_sa_timeline_cleanup_results"><![CDATA[Step 2: Results]]></string>
+    <string name="_sa_timeline_cleanup_event_type"><![CDATA[Event Type]]></string>
+    <string name="_sa_timeline_cleanup_count"><![CDATA[Count]]></string>
+    <string name="_sa_timeline_cleanup_oldest"><![CDATA[Oldest]]></string>
+    <string name="_sa_timeline_cleanup_newest"><![CDATA[Newest]]></string>
+    <string name="_sa_timeline_cleanup_matching"><![CDATA[Events matching criteria]]></string>
+    <string name="_sa_timeline_cleanup_processed"><![CDATA[Events processed]]></string>
+    <string name="_sa_timeline_cleanup_deleted"><![CDATA[Successfully deleted]]></string>
+    <string name="_sa_timeline_cleanup_failed"><![CDATA[Failed]]></string>
+    <string name="_sa_timeline_cleanup_skipped"><![CDATA[Skipped (already deleted)]]></string>
+    <string name="_sa_timeline_cleanup_dry_run_complete"><![CDATA[DRY RUN COMPLETE — No actual deletions performed. Review results above, then turn off Dry Run to execute.]]></string>
+    <string name="_sa_timeline_cleanup_live_complete"><![CDATA[CLEANUP COMPLETE — Deletions were performed. Run again to process the next batch.]]></string>
+    <string name="_sa_timeline_cleanup_no_events"><![CDATA[No events found matching the criteria.]]></string>
+    <string name="_sa_timeline_cleanup_module_not_found"><![CDATA[FATAL ERROR: Timeline module not found!]]></string>
+    <string name="_sa_timeline_cleanup_access_denied"><![CDATA[Access denied.]]></string>
+    <string name="_sa_timeline_cleanup_confirm_live"><![WARNING: This will permanently delete timeline events and their media files. This action cannot be undone. Are you sure?]]></string>
+</resources>

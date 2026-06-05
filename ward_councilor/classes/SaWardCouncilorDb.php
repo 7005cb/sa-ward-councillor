@@ -31,10 +31,16 @@ class SaWardCouncilorDb extends BxDolModuleDb
         $iProfileId = (int)$iProfileId;
         if($iProfileId <= 0) return array();
         return $this->getAll(
-            "SELECT d.id, d.space_name AS title
-             FROM bx_spaces_data d
-             JOIN bx_spaces_fans f ON d.id = f.content
-             WHERE f.initiator = ? AND d.status = 'active' AND d.status_admin = 'active'
+            "SELECT p.id AS profile_id,
+                    d.id AS content_id,
+                    d.space_name AS title
+             FROM bx_spaces_fans c
+             JOIN sys_profiles p ON p.id = c.content
+                  AND p.type = 'bx_spaces' AND p.status = 'active'
+             JOIN bx_spaces_data d ON d.id = p.content_id
+                  AND d.status = 'active' AND d.status_admin = 'active'
+             WHERE c.initiator = ?
+               AND c.mutual = 1
              ORDER BY d.space_name ASC",
             [$iProfileId]
         );

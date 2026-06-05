@@ -1,0 +1,14 @@
+This App is needed to create paid membership levels. It works with default membership levels created in Studio -> **Permissions** App. 
+First of all you need to configure **Payments** App which is used to process payments (single and/or recurring), you may read about it [here](https://github.com/unaio/una/wiki/Payments).
+When it's done you are ready to start selling the mebership levels. Go to Studio -> **Paid Levels** App. If you see a notification message like the following 
+> 'Site administrator' is empty. You need to mark some profile as 'Site administrator' in Settings of currently active Payment module.
+
+then it would be better to recheck **Payments** App [configuration manual](https://github.com/unaio/una/wiki/Payments) and follow it step by step. If you did it and the notification is still there then you need to go to **Payments** App and select some profile in 'Site administrator' setting. Site related content, like membership levels, will be sold on behalf of this user. Note, this user should have Operator rights (to give Operator status you may use Studio -> **Accounts** App). So, you may use the default Operator profile or create additional one to separate payment related tasks from common site configuration ones. Don't forget, payment provider(s) should be configured for the profile you've selected. When it's done you may create a pricing plan for some membership level.
+
+Select a membership level in 'Select Level...' dropdown. By default you may create pricing plans for 'Premium' membership level only. If you need more levels you are welcome to create them in Studio -> **Permissions** App.
+When the level was selected you need to click with 'Add' button at the right and fill in the form. Each field in the form has a tooltip message which should help you to complete the task. You may create any number of pricing plans for selected membership level as you need. 
+
+If you use PayPal (single payments) newly created pricing plan become available to purchase in User end immediately after the creation. However if you plan to sell subscriptions using Stripe then you need to copy the name ('Name' field in the table) of the newly created pricing plan and use it to create identical plan in your Stripe Dashboard. This 'Name' from **Paid Levels** App will be used as 'Unique ID' in Stripe Dashboard -> Subscriptions -> Plans -> New plan creation form.
+
+Note, if you configured both PayPal (single payments) and Stripe (recurring payments) then user will see only 'Rent' button to purchase subscription.
+That's it. Now you may go to User end -> Account popup -> Settings page -> Membership tab and check newly created pricing plans. If some pricing plan was created as Free pricing plan (0 or empty value was used for 'Price' field) then the lavel can be selected (chosen) without processing via payment provider. 

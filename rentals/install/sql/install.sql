@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS `sa_rentals_listings` (
   `latitude`             decimal(10,8)          DEFAULT NULL,
   `longitude`            decimal(11,8)          DEFAULT NULL,
   `author_id`            int(11)       NOT NULL DEFAULT 0,
-  `status`               enum('available','hold','booked','taken') NOT NULL DEFAULT 'available',
+  `status`               enum('available','hold','booked','taken','pending') NOT NULL DEFAULT 'available',
   `created`              datetime      NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated`              datetime      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -135,16 +135,23 @@ VALUES
   ('sa_rentals', 'edit own entry',   NULL, '_acl_txt_sa_rentals_edit_own_entry',   '', 0, ''),
   ('sa_rentals', 'edit any entry',   NULL, '_acl_txt_sa_rentals_edit_any_entry',   '', 0, ''),
   ('sa_rentals', 'delete own entry', NULL, '_acl_txt_sa_rentals_delete_own_entry', '', 0, ''),
-  ('sa_rentals', 'delete any entry', NULL, '_acl_txt_sa_rentals_delete_any_entry', '', 0, '');
+  ('sa_rentals', 'delete any entry', NULL, '_acl_txt_sa_rentals_delete_any_entry', '', 0, ''),
+  ('sa_rentals', 'approve entry',    NULL, '_acl_txt_sa_rentals_approve_entry',    '', 0, ''),
+  ('sa_rentals', 'feature entry',    NULL, '_acl_txt_sa_rentals_feature_entry',    '', 0, '');
 
 INSERT INTO `sys_acl_matrix` (`IDLevel`, `IDAction`)
 SELECT 3, `ID` FROM `sys_acl_actions`
 WHERE `Module` = 'sa_rentals'
 AND `Name` IN ('view entry', 'create entry', 'edit own entry', 'delete own entry');
 
+-- Level 5 = Moderator: all standard actions + approve
 INSERT INTO `sys_acl_matrix` (`IDLevel`, `IDAction`)
-SELECT 5, `ID` FROM `sys_acl_actions` WHERE `Module` = 'sa_rentals';
+SELECT 5, `ID` FROM `sys_acl_actions`
+WHERE `Module` = 'sa_rentals'
+AND `Name` IN ('view entry', 'create entry', 'edit own entry', 'edit any entry',
+               'delete own entry', 'delete any entry', 'approve entry');
 
+-- Level 8 = Admin: all actions including feature
 INSERT INTO `sys_acl_matrix` (`IDLevel`, `IDAction`)
 SELECT 8, `ID` FROM `sys_acl_actions` WHERE `Module` = 'sa_rentals';
 -- ────────────────────────────────────────────────────────────────────────────
@@ -154,4 +161,31 @@ INSERT INTO `sys_objects_content_info`
   (`name`, `title`, `alert_unit`, `alert_action_add`, `alert_action_update`, `alert_action_delete`, `class_name`, `class_file`)
 VALUES
   ('sa_rentals', '_sa_rentals_content_info', 'sa_rentals', 'added', 'edited', 'deleted', '', '');
+-- ────────────────────────────────────────────────────────────────────────────
+
+-- ─── Privacy (Option B — native UNA "Visible to..." system) ─────────────────
+INSERT IGNORE INTO `sys_objects_privacy`
+  (`object`, `module`, `action`, `allow_view_to`, `allow_view_to_editable`, `allow_post_to`, `allow_post_to_editable`)
+VALUES
+  ('sa_rentals_view', 'sa_rentals', 'view', 2147483647, 1, 2147483647, 1);
+-- ────────────────────────────────────────────────────────────────────────────
+
+-- ─── Feature toggles (sys_options) ──────────────────────────────────────────
+INSERT IGNORE INTO `sys_options`
+  (`name`, `value`, `category_id`, `caption`, `type`, `extra`, `check`, `check_params`, `check_error`, `order`)
+VALUES
+  ('sa_rentals_require_tenant_reg',  'on',  0, '_sa_rentals_opt_require_tenant_reg',  'checkbox', '', '', '', '', 1),
+  ('sa_rentals_agent_verification',  'on',  0, '_sa_rentals_opt_agent_verification',  'checkbox', '', '', '', '', 2),
+  ('sa_rentals_blacklisting',        '',    0, '_sa_rentals_opt_blacklisting',         'checkbox', '', '', '', '', 3),
+  ('sa_rentals_show_banners',        '',    0, '_sa_rentals_opt_show_banners',         'checkbox', '', '', '', '', 4),
+  ('sa_rentals_moderation',          '',    0, '_sa_rentals_opt_moderation',           'checkbox', '', '', '', '', 5);
+-- ────────────────────────────────────────────────────────────────────────────
+
+-- ─── Admin page ─────────────────────────────────────────────────────────────
+INSERT INTO `sys_objects_page`(`author`,`added`,`object`,`uri`,`title_system`,`title`,`module`,`cover`,`cover_image`,`cover_title`,`type_id`,`layout_id`,`sticky_columns`,`submenu`,`visible_for_levels`,`visible_for_levels_editable`,`url`,`content_info`,`meta_title`,`meta_description`,`meta_keywords`,`meta_robots`,`cache_lifetime`,`cache_editable`,`inj_head`,`inj_footer`,`config_api`,`deletable`,`override_class_name`,`override_class_file`) VALUES
+(0,UNIX_TIMESTAMP(),'sa_rentals_admin','sa-rentals-admin','_sa_rentals_page_admin_sys','_sa_rentals_page_admin','sa_rentals',0,0,'',1,5,0,'',36,1,'page.php?i=sa-rentals-admin','','','','','',0,1,'','','',0,'','');
+
+-- Serialized: sa_rentals=10, get_admin_listings_block=24
+INSERT INTO `sys_pages_blocks`(`object`,`cell_id`,`module`,`title_system`,`title`,`designbox_id`,`class`,`submenu`,`tabs`,`async`,`visible_for_levels`,`hidden_on`,`type`,`content`,`content_empty`,`text`,`text_updated`,`help`,`cache_lifetime`,`config_api`,`deletable`,`copyable`,`active`,`active_api`,`order`) VALUES
+('sa_rentals_admin',1,'sa_rentals','','_sa_rentals_block_admin',11,'','',0,0,36,'','service','a:2:{s:6:"module";s:10:"sa_rentals";s:6:"method";s:24:"get_admin_listings_block";}','','',0,'',0,'',0,1,1,0,1);
 -- ────────────────────────────────────────────────────────────────────────────

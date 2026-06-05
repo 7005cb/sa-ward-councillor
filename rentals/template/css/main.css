@@ -267,3 +267,72 @@
     background: rgba(0,122,77,0.1); padding: 3px 10px;
     border-radius: 12px; display: inline-block; margin-bottom: 8px;
 }
+
+/* ── Pending status badge ── */
+.sar-status-grey, .sar-status-pending {
+    background: rgba(120,120,120,0.15); color: #666;
+}
+
+/* ── Admin manage page ── */
+.sar-admin-tabs {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    margin-bottom: 20px; border-bottom: 2px solid var(--bx-def-border-color, #e0e0e0);
+    padding-bottom: 12px;
+}
+.sar-tab {
+    padding: 6px 14px;
+    color: var(--bx-def-font-color-secondary, #666) !important;
+    text-decoration: none; font-size: 13px; font-weight: 600;
+    border-radius: 4px 4px 0 0;
+    border: 1px solid transparent;
+    background: transparent;
+}
+.sar-tab:hover {
+    color: var(--bx-def-color-primary, #007a4d) !important;
+    background: rgba(0,122,77,0.07);
+}
+.sar-tab-active {
+    color: var(--bx-def-color-primary, #007a4d) !important;
+    border-color: var(--bx-def-border-color, #e0e0e0) !important;
+    border-bottom-color: var(--bx-def-color-bg-block, #fff) !important;
+    background: var(--bx-def-color-bg-block, #fff) !important;
+}
+
+.sar-admin-table {
+    width: 100%; border-collapse: collapse;
+    background: var(--bx-def-color-bg-block, #fff) !important;
+    border: 1px solid var(--bx-def-border-color, #e0e0e0) !important;
+    border-radius: 6px; overflow: hidden; font-size: 13px;
+}
+.sar-admin-table th {
+    background: var(--bx-def-color-bg-block-hover, #f0f0f0) !important;
+    color: var(--bx-def-font-color, #2d2d2d);
+    padding: 10px 12px; text-align: left; font-weight: 700;
+    border-bottom: 2px solid var(--bx-def-border-color, #e0e0e0) !important;
+    font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px;
+}
+.sar-admin-table td {
+    padding: 10px 12px; vertical-align: middle;
+    border-bottom: 1px solid var(--bx-def-border-color, #eee) !important;
+    color: var(--bx-def-font-color, #2d2d2d);
+}
+.sar-admin-table tr:last-child td { border-bottom: none !important; }
+.sar-admin-table tr:hover td {
+    background: rgba(0,122,77,0.04) !important;
+}
+.sar-admin-table a {
+    color: var(--bx-def-color-primary, #007a4d) !important;
+    text-decoration: none;
+}
+
+.sar-admin-act {
+    display: inline-block; padding: 3px 10px;
+    border-radius: 3px; font-size: 12px; font-weight: 600;
+    margin-right: 4px; text-decoration: none !important;
+    border: 1px solid transparent;
+}
+.sar-admin-act-view   { background: rgba(0,122,77,0.1); color: #007a4d !important; border-color: rgba(0,122,77,0.3) !important; }
+.sar-admin-act-approve { background: rgba(0,122,77,0.85) !important; color: #fff !important; }
+.sar-admin-act-feature  { background: rgba(240,165,0,0.15); color: #b07800 !important; border-color: rgba(240,165,0,0.4) !important; }
+.sar-admin-act-unfeature { background: rgba(120,120,120,0.1); color: #666 !important; border-color: rgba(120,120,120,0.3) !important; }
+.sar-admin-act-delete  { background: rgba(200,64,64,0.1); color: #c84040 !important; border-color: rgba(200,64,64,0.3) !important; }

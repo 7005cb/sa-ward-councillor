@@ -1,0 +1,11 @@
+- **PHP 8.1**
+    - **allow_url_fopen** must be on
+    - **allow_url_include** must be off
+    - **short_open_tag** must be on
+    - **memory_limit** >= 128Mb
+    - **disable_functions** shouldn't contain shell_exec, eval, assert, phpinfo, getenv, ini_set, fsockopen, chmod, parse_ini_file, readfile, escapeshellcmd, fput, popen
+    - **curl, xml, gd, mbstring, json, fileinfo, zip, openssl, exif** modules must be enabled
+- **MySQL 5.5.3** (starting from 9.0.0-RC5) or **MariaDB 5.5**
+- Apache compatible or Nginx web-server (other web-servers may require special setup for rewrite rules)
+- **Ffmpeg** binary must be allowed to be run
+- Ability to setup **cron jobs** with one minute interval

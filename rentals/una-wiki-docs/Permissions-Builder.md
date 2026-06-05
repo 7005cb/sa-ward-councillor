@@ -1,0 +1,3 @@
+One of the most important aspects of any membership-based CMS is permissions and membership levels management. This is where you setup what certain members can do, how much they have to pay, what they're called and for how long they're granted their membership levels. Nobody can get it quite right. We've seen dozens of different approaches and all of them seem to be either very limited or overcomplicated. Here is our take on how Permissions Builder should work. 
+
+https://www.youtube.com/watch?v=HA8N4Tedx40

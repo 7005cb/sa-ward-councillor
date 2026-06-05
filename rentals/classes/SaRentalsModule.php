@@ -8,6 +8,44 @@ class SaRentalsModule extends BxDolModule
         parent::__construct($aModule);
     }
 
+    // ── Lifecycle ──────────────────────────────────────────────────────────────
+
+    public function onEnable()
+    {
+        parent::onEnable();
+        // Register Timeline handlers
+        if (BxDolModule::getInstance('bx_timeline')) {
+            $oTimeline = BxDolModule::getInstance('bx_timeline');
+            if ($oTimeline && method_exists($oTimeline, 'serviceAddHandlers'))
+                $oTimeline->serviceAddHandlers($this->serviceGetTimelineData());
+        }
+        // Register Notifications handlers
+        if (BxDolModule::getInstance('bx_notifications')) {
+            $oNotifs = BxDolModule::getInstance('bx_notifications');
+            if ($oNotifs && method_exists($oNotifs, 'serviceAddHandlers'))
+                $oNotifs->serviceAddHandlers($this->serviceGetNotificationsData());
+        }
+        return true;
+    }
+
+    public function onDisable()
+    {
+        parent::onDisable();
+        // Deregister Timeline handlers
+        if (BxDolModule::getInstance('bx_timeline')) {
+            $oTimeline = BxDolModule::getInstance('bx_timeline');
+            if ($oTimeline && method_exists($oTimeline, 'serviceRemoveHandlers'))
+                $oTimeline->serviceRemoveHandlers($this->serviceGetTimelineData());
+        }
+        // Deregister Notifications handlers
+        if (BxDolModule::getInstance('bx_notifications')) {
+            $oNotifs = BxDolModule::getInstance('bx_notifications');
+            if ($oNotifs && method_exists($oNotifs, 'serviceRemoveHandlers'))
+                $oNotifs->serviceRemoveHandlers($this->serviceGetNotificationsData());
+        }
+        return true;
+    }
+
     // ── Listings page ──────────────────────────────────────────────────────────
     function serviceGetListingsBlock()
     {
@@ -194,6 +232,9 @@ class SaRentalsModule extends BxDolModule
             if (empty($aData['title']) || empty($aData['rent_zar'])) {
                 $sMsg = '<div class="sar-error">' . _t('_sa_rentals_error_required') . '</div>';
             } else {
+                // Moderation toggle: if enabled, new listings start as 'pending'
+                if (getParam('sa_rentals_moderation') == 'on')
+                    $aData['status'] = 'pending';
                 $bResult = $this->_oDb->addListing($aData);
                 $iListingId = $this->_oDb->getLastInsertId();
                 if ($bResult && $iListingId > 0) {
@@ -201,6 +242,10 @@ class SaRentalsModule extends BxDolModule
                     $iOwnerId = !empty($aData['space_id']) ? (int)$aData['space_id'] : $iUserId;
                     $oAlert = new BxDolAlerts('sa_rentals', 'added', $iListingId, $iUserId, array('owner_id' => $iOwnerId));
                     $oAlert->alert();
+                    // If listing is pending, stay on page with a message instead of redirecting
+                    if (!empty($aData['status']) && $aData['status'] === 'pending') {
+                        return '<div class="sar-form-wrap"><div class="sar-success">' . _t('_sa_rentals_pending_submitted') . '</div></div>';
+                    }
                     header('Location: ' . BX_DOL_URL_ROOT . 'page.php?i=view-rentals-listing&id=' . $iListingId);
                     exit;
                 }
@@ -266,7 +311,7 @@ class SaRentalsModule extends BxDolModule
             return '<p class="sar-empty">' . _t('_sa_rentals_no_my_listings') . '</p>
                     <a href="' . BX_DOL_URL_ROOT . 'page.php?i=create-rentals-listing" class="sar-btn-create">' . _t('_sa_rentals_post_listing') . '</a>';
 
-        $aStatusColors = array('available'=>'green','hold'=>'orange','booked'=>'blue','taken'=>'red');
+        $aStatusColors = array('available'=>'green','hold'=>'orange','booked'=>'blue','taken'=>'red','pending'=>'grey');
         $sOut = '<div class="sar-my-listings">';
         $sOut .= '<a href="' . BX_DOL_URL_ROOT . 'page.php?i=create-rentals-listing" class="sar-btn-create">' . _t('_sa_rentals_post_listing') . '</a>';
         foreach ($aListings as $a) {
@@ -578,11 +623,126 @@ class SaRentalsModule extends BxDolModule
         </div>';
     }
 
+    // ─── Admin manage block ────────────────────────────────────────────────────
+
+    public function serviceGetAdminListingsBlock()
+    {
+        $this->_oTemplate->addCss(array('main.css'));
+        $iUserId = bx_get_logged_profile_id();
+
+        // Only moderators and admins
+        if (!BxDolAcl::getInstance()->isAllowed('sa_rentals', 'approve entry', false)
+            && !BxDolAcl::getInstance()->isAllowed('sa_rentals', 'edit any entry', false))
+            return '<p>' . _t('_sa_rentals_no_permission') . '</p>';
+
+        // Handle actions
+        $sAction = bx_process_input(bx_get('sar_action'), BX_DATA_TEXT);
+        $iTargetId = (int)bx_get('sar_id');
+
+        $sMsg = '';
+        if ($sAction && $iTargetId) {
+            switch ($sAction) {
+                case 'approve':
+                    if ($this->checkAllowApprove($iTargetId)) {
+                        $this->_oDb->approveListing($iTargetId);
+                        $sMsg = '<div class="sar-success">' . _t('_sa_rentals_admin_approved') . '</div>';
+                    }
+                    break;
+                case 'feature':
+                    if ($this->checkAllowFeature($iTargetId)) {
+                        $this->_oDb->featureListing($iTargetId, true);
+                        $sMsg = '<div class="sar-success">' . _t('_sa_rentals_admin_featured') . '</div>';
+                    }
+                    break;
+                case 'unfeature':
+                    if ($this->checkAllowFeature($iTargetId)) {
+                        $this->_oDb->featureListing($iTargetId, false);
+                        $sMsg = '<div class="sar-success">' . _t('_sa_rentals_admin_unfeatured') . '</div>';
+                    }
+                    break;
+                case 'delete':
+                    if ($this->checkAllowDelete($iTargetId)) {
+                        $this->_oDb->deleteListing($iTargetId);
+                        $oAlert = new BxDolAlerts('sa_rentals', 'deleted', $iTargetId, $iUserId);
+                        $oAlert->alert();
+                        $sMsg = '<div class="sar-success">' . _t('_sa_rentals_admin_deleted') . '</div>';
+                    }
+                    break;
+            }
+        }
+
+        // Filter
+        $sStatusFilter = bx_process_input(bx_get('sar_status'), BX_DATA_TEXT);
+        $aFilter = array();
+        if ($sStatusFilter) $aFilter['status'] = $sStatusFilter;
+
+        $aListings = $this->_oDb->getListingsAdmin($aFilter);
+
+        $sBaseUrl = BX_DOL_URL_ROOT . 'page.php?i=sa-rentals-admin';
+
+        // Status filter tabs
+        $aStatuses = array('' => _t('_sa_rentals_admin_all'), 'pending' => _t('_sa_rentals_status_pending'),
+            'available' => _t('_sa_rentals_status_available'), 'hold' => _t('_sa_rentals_status_hold'),
+            'booked' => _t('_sa_rentals_status_booked'), 'taken' => _t('_sa_rentals_status_taken'));
+        $sTabs = '<div class="sar-admin-tabs">';
+        foreach ($aStatuses as $sVal => $sLabel) {
+            $sActive = ($sStatusFilter === $sVal) ? ' sar-tab-active' : '';
+            $sTabs .= '<a class="sar-tab' . $sActive . '" href="' . $sBaseUrl . '&sar_status=' . urlencode($sVal) . '">' . $sLabel . '</a>';
+        }
+        $sTabs .= '</div>';
+
+        if (empty($aListings)) {
+            return '<div class="sar-wrap">' . $sMsg . $sTabs . '<p class="sar-empty">' . _t('_sa_rentals_no_listings') . '</p></div>';
+        }
+
+        $sTable = '<table class="sar-admin-table">
+            <thead><tr>
+                <th>' . _t('_sa_rentals_admin_col_id') . '</th>
+                <th>' . _t('_sa_rentals_title') . '</th>
+                <th>' . _t('_sa_rentals_province') . '</th>
+                <th>' . _t('_sa_rentals_rent') . '</th>
+                <th>' . _t('_sa_rentals_status_label') . '</th>
+                <th>' . _t('_sa_rentals_admin_col_featured') . '</th>
+                <th>' . _t('_sa_rentals_admin_col_created') . '</th>
+                <th>' . _t('_sa_rentals_admin_col_actions') . '</th>
+            </tr></thead><tbody>';
+
+        $aStatusColors = array('available'=>'green','hold'=>'orange','booked'=>'blue','taken'=>'red','pending'=>'grey');
+        foreach ($aListings as $a) {
+            $iId = (int)$a['id'];
+            $sColor = isset($aStatusColors[$a['status']]) ? $aStatusColors[$a['status']] : 'green';
+            $sFeatBadge = $a['featured'] ? '<span class="sar-featured">&#11088;</span>' : '—';
+
+            $sActions = '<a href="' . BX_DOL_URL_ROOT . 'page.php?i=view-rentals-listing&id=' . $iId . '" class="sar-admin-act sar-admin-act-view">' . _t('_sa_rentals_view') . '</a>';
+            if ($a['status'] === 'pending')
+                $sActions .= ' <a href="' . $sBaseUrl . '&sar_action=approve&sar_id=' . $iId . '&sar_status=' . urlencode($sStatusFilter) . '" class="sar-admin-act sar-admin-act-approve">' . _t('_sa_rentals_admin_approve') . '</a>';
+            if ($a['featured'])
+                $sActions .= ' <a href="' . $sBaseUrl . '&sar_action=unfeature&sar_id=' . $iId . '&sar_status=' . urlencode($sStatusFilter) . '" class="sar-admin-act sar-admin-act-unfeature">' . _t('_sa_rentals_admin_unfeature') . '</a>';
+            else
+                $sActions .= ' <a href="' . $sBaseUrl . '&sar_action=feature&sar_id=' . $iId . '&sar_status=' . urlencode($sStatusFilter) . '" class="sar-admin-act sar-admin-act-feature">' . _t('_sa_rentals_admin_feature') . '</a>';
+            $sActions .= ' <a href="' . $sBaseUrl . '&sar_action=delete&sar_id=' . $iId . '&sar_status=' . urlencode($sStatusFilter) . '" class="sar-admin-act sar-admin-act-delete" onclick="return confirm(\'' . _t('_sa_rentals_admin_confirm_delete') . '\')">' . _t('_sa_rentals_delete') . '</a>';
+
+            $sTable .= '<tr>
+                <td>' . $iId . '</td>
+                <td><a href="' . BX_DOL_URL_ROOT . 'page.php?i=view-rentals-listing&id=' . $iId . '">' . htmlspecialchars($a['title']) . '</a></td>
+                <td>' . htmlspecialchars($a['province']) . '</td>
+                <td>R ' . number_format((float)$a['rent_zar'], 2) . '</td>
+                <td><span class="sar-status sar-status-' . $sColor . '">' . _t('_sa_rentals_status_' . $a['status']) . '</span></td>
+                <td>' . $sFeatBadge . '</td>
+                <td>' . date('d M Y', strtotime($a['created'])) . '</td>
+                <td>' . $sActions . '</td>
+            </tr>';
+        }
+        $sTable .= '</tbody></table>';
+
+        return '<div class="sar-wrap">' . $sMsg . $sTabs . $sTable . '</div>';
+    }
+
     // ─── Permission Gates ──────────────────────────────────────────────────────
 
     public function checkAllowView($iEntryId)
     {
-        if (!BxDolAcl::getInstance()->isMemberLevelInSet('view entry'))
+        if (!BxDolAcl::getInstance()->isAllowed('sa_rentals', 'view entry', false))
             return false;
         $aEntry = $this->_oDb->getListing($iEntryId);
         if (!$aEntry)
@@ -596,9 +756,9 @@ class SaRentalsModule extends BxDolModule
     {
         $aEntry = $this->_oDb->getListing($iEntryId);
         $iProfileId = bx_get_logged_profile_id();
-        if (BxDolAcl::getInstance()->isMemberLevelInSet('edit any entry'))
+        if (BxDolAcl::getInstance()->isAllowed('sa_rentals', 'edit any entry', false))
             return true;
-        if (BxDolAcl::getInstance()->isMemberLevelInSet('edit own entry')
+        if (BxDolAcl::getInstance()->isAllowed('sa_rentals', 'edit own entry', false)
             && (int)$aEntry['author_id'] === (int)$iProfileId)
             return true;
         return false;
@@ -608,12 +768,22 @@ class SaRentalsModule extends BxDolModule
     {
         $aEntry = $this->_oDb->getListing($iEntryId);
         $iProfileId = bx_get_logged_profile_id();
-        if (BxDolAcl::getInstance()->isMemberLevelInSet('delete any entry'))
+        if (BxDolAcl::getInstance()->isAllowed('sa_rentals', 'delete any entry', false))
             return true;
-        if (BxDolAcl::getInstance()->isMemberLevelInSet('delete own entry')
+        if (BxDolAcl::getInstance()->isAllowed('sa_rentals', 'delete own entry', false)
             && (int)$aEntry['author_id'] === (int)$iProfileId)
             return true;
         return false;
+    }
+
+    public function checkAllowApprove($iEntryId)
+    {
+        return BxDolAcl::getInstance()->isAllowed('sa_rentals', 'approve entry', false);
+    }
+
+    public function checkAllowFeature($iEntryId)
+    {
+        return BxDolAcl::getInstance()->isAllowed('sa_rentals', 'feature entry', false);
     }
 
     // ─── Timeline Integration ──────────────────────────────────────────────────

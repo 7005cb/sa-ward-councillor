@@ -1,0 +1,255 @@
+This info is for all standard UNA modules, if you have custom modules or modules from 3rd-party providers then such info can be in other tables as well.
+
+## Personal data
+- `sys_accounts` table, `name`, `email`, `phone`, `password` fields
+- `bx_persons_data` table, `fullname`, `last_name`, `birthday` fields and maybe some other custom fields which was added
+- `bx_inv_invites` table, `email` field
+- `bx_inv_requests` table, `email` field
+- `bx_massmailer_campaigns`, `reply_to` and `email_list` fields
+- `bx_massmailer_letters`, `email` field
+- `bx_massmailer_segments`, `email_list` field
+- `bx_xero_contacts`, `email` field
+- `sys_queue_email, `email` field
+
+## Locations for users and other content
+- `bx_ads_meta_locations`
+- `bx_ads_entries`, `location` field
+- `bx_albums_meta_locations`
+- `bx_albums_albums`, `location` field
+- `bx_classes_meta_locations`
+- `bx_classes_classes`, `location` field
+- `bx_courses_meta_locations`
+- `bx_courses_data`, `location` field
+- `bx_directory_meta_locations`
+- `bx_events_meta_locations`
+- `bx_events_data`, `location` field
+- `bx_groups_meta_locations`
+- `bx_groups_data`, `location` field
+- `bx_market_meta_locations`
+- `bx_market_products`, `location` field
+- `bx_organizations_meta_locations`
+- `bx_organizations_data`, `location` field
+- `bx_persons_meta_locations`
+- `bx_persons_data`, `location` field
+- `bx_photos_meta_locations`
+- `bx_photos_entries `, `location` field
+- `bx_polls_meta_locations`
+- `bx_polls_entries`, `location` field
+- `bx_posts_meta_locations`
+- `bx_posts_posts`, `location` field
+- `bx_reviews_meta_locations`
+- `bx_reviews_reviews`, `location` field
+- `bx_shopify_meta_locations`
+- `bx_shopify_entries`, `location` field
+- `bx_snipcart_meta_locations`
+- `bx_snipcart_entries`, `location` field
+- `bx_spaces_meta_locations`
+- `bx_spaces_data`, `location` field
+- `bx_stream_meta_locations`
+- `bx_stream_streams`, `location` field
+- `bx_timeline_meta_locations`
+- `bx_timeline_events`, `location` field
+- `bx_videos_meta_locations`
+- `bx_videos_entries`, `location` field
+- `bx_mapshow_accounts`
+
+## Users IPs
+- `sys_accounts` table, `ip` field
+- `bx_antispam_block_log` table, `ip` field
+- `bx_ads_polls_answers_votes_track` table, `author_nip` field
+- `bx_ads_reactions_track` table, `author_nip` field
+- `bx_ads_reports_track` table, `author_nip` field
+- `bx_ads_views_track` table, `viewer_nip` field
+- `bx_ads_votes_track` table, `author_nip` field
+- `bx_albums_reactions_track` table, `author_nip` field
+- `bx_albums_reports_media_track` table, `author_nip` field
+- `bx_albums_reports_track` table, `author_nip` field
+- `bx_albums_scores_media_track` table, `author_nip` field
+- `bx_albums_scores_track` table, `author_nip` field
+- `bx_albums_views_media_track` table, `viewer_nip` field
+- `bx_albums_views_track` table, `viewer_nip` field
+- `bx_albums_votes_media_track` table, `author_nip` field
+- `bx_albums_votes_track` table, `author_nip` field
+- `bx_classes_polls_answers_votes_track` table, `author_nip` field
+- `bx_classes_reactions_track` table, `author_nip` field
+- `bx_classes_reports_track` table, `author_nip` field
+- `bx_classes_scores_track` table, `author_nip` field
+- `bx_classes_views_track` table, `viewer_nip` field
+- `bx_classes_votes_track` table, `author_nip` field
+- `bx_cnl_reports_track` table, `author_nip` field
+- `bx_cnl_scores_track` table, `author_nip` field
+- `bx_cnl_views_track` table, `viewer_nip` field
+- `bx_cnl_votes_track` table, `author_nip` field
+- `bx_convos_views_track` table, `author_nip` field
+- `bx_courses_reports_track` table, `author_nip` field
+- `bx_courses_scores_track` table, `author_nip` field
+- `bx_courses_views_track` table, `viewer_nip` field
+- `bx_courses_votes_track` table, `author_nip` field
+- `bx_directory_polls_answers_votes_track` table, `author_nip` field
+- `bx_directory_reactions_track` table, `author_nip` field
+- `bx_directory_reports_track` table, `author_nip` field
+- `bx_directory_scores_track` table, `author_nip` field
+- `bx_directory_views_track` table, `viewer_nip` field
+- `bx_directory_votes_track` table, `author_nip` field
+- `bx_events_reports_track` table, `author_nip` field
+- `bx_events_scores_track` table, `author_nip` field
+- `bx_events_views_track` table, `viewer_nip` field
+- `bx_events_votes_track` table, `author_nip` field
+- `bx_files_reactions_track` table, `author_nip` field
+- `bx_files_reports_track` table, `author_nip` field
+- `bx_files_scores_track` table, `author_nip` field
+- `bx_files_views_track` table, `viewer_nip` field
+- `bx_files_votes_track` table, `author_nip` field
+- `bx_forum_polls_answers_votes_track` table, `author_nip` field
+- `bx_forum_reactions_track` table, `author_nip` field
+- `bx_forum_reports_track` table, `author_nip` field
+- `bx_forum_scores_track` table, `author_nip` field
+- `bx_forum_views_track` table, `viewer_nip` field
+- `bx_forum_votes_track` table, `author_nip` field
+- `bx_glossary_reactions_track` table, `author_nip` field
+- `bx_glossary_reports_track` table, `author_nip` field
+- `bx_glossary_scores_track` table, `author_nip` field
+- `bx_glossary_views_track` table, `viewer_nip` field
+- `bx_glossary_votes_track` table, `author_nip` field
+- `bx_groups_reports_track` table, `author_nip` field
+- `bx_groups_scores_track` table, `author_nip` field
+- `bx_groups_views_track` table, `author_nip` field
+- `bx_groups_votes_track` table, `author_nip` field
+- `bx_market_downloads_track` table, `profile_nip` field
+- `bx_market_reactions_track` table, `author_nip` field
+- `bx_market_reports_track` table, `author_nip` field
+- `bx_market_scores_track` table, `author_nip` field
+- `bx_market_views_track` table, `viewer_nip` field
+- `bx_market_votes_track` table, `author_nip` field
+- `bx_organizations_reports_track` table, `author_nip` field
+- `bx_organizations_scores_track` table, `author_nip` field
+- `bx_organizations_views_track` table, `viewer_nip` field
+- `bx_organizations_votes_track` table, `author_nip` field
+- `bx_persons_reports_track` table, `author_nip` field
+- `bx_persons_scores_track` table, `author_nip` field
+- `bx_persons_views_track` table, `viewer_nip` field
+- `bx_persons_votes_track` table, `author_nip` field
+- `bx_photos_reactions_track` table, `author_nip` field
+- `bx_photos_reports_track` table, `author_nip` field
+- `bx_photos_scores_track` table, `author_nip` field
+- `bx_photos_svotes_track` table, `author_nip` field
+- `bx_photos_views_track` table, `viewer_nip` field
+- `bx_photos_votes_track` table, `author_nip` field
+- `bx_polls_reactions_track` table, `author_nip` field
+- `bx_polls_reports_track` table, `author_nip` field
+- `bx_polls_scores_track` table, `author_nip` field
+- `bx_polls_views_track` table, `viewer_nip` field
+- `bx_polls_votes_subentries_track` table, `author_nip` field
+- `bx_polls_votes_track` table, `author_nip` field
+- `bx_posts_polls_answers_votes_track` table, `author_nip` field
+- `bx_posts_reactions_track` table, `author_nip` field
+- `bx_posts_reports_track` table, `author_nip` field
+- `bx_posts_scores_track` table, `author_nip` field
+- `bx_posts_views_track` table, `viewer_nip` field
+- `bx_posts_votes_track` table, `author_nip` field
+- `bx_reviews_polls_answers_votes_track` table, `author_nip` field
+- `bx_reviews_reactions_track` table, `author_nip` field
+- `bx_reviews_reports_track` table, `author_nip` field
+- `bx_reviews_scores_track` table, `author_nip` field
+- `bx_reviews_svotes_track` table, `author_nip` field
+- `bx_reviews_votes_track` table, `author_nip` field
+- `bx_reviews_views_track` table, `viewer_nip` field
+- `bx_shopify_reactions_track` table, `author_nip` field
+- `bx_shopify_reports_track` table, `author_nip` field
+- `bx_shopify_scores_track` table, `author_nip` field
+- `bx_shopify_views_track` table, `viewer_nip` field
+- `bx_shopify_votes_track` table, `author_nip` field
+- `bx_snipcart_reactions_track` table, `author_nip` field
+- `bx_snipcart_reports_track` table, `author_nip` field
+- `bx_snipcart_scores_track` table, `author_nip` field
+- `bx_snipcart_views_track` table, `viewer_nip` field
+- `bx_snipcart_votes_track` table, `author_nip` field
+- `bx_spaces_reports_track` table, `author_nip` field
+- `bx_spaces_scores_track` table, `author_nip` field
+- `bx_spaces_views_track` table, `viewer_nip` field
+- `bx_spaces_votes_track` table, `author_nip` field
+- `bx_stream_reactions_track` table, `author_nip` field
+- `bx_stream_reports_track` table, `author_nip` field
+- `bx_stream_scores_track` table, `author_nip` field
+- `bx_stream_views_track` table, `viewer_nip` field
+- `bx_stream_votes_track` table, `author_nip` field
+- `bx_tasks_reactions_track` table, `author_nip` field
+- `bx_tasks_reports_track` table, `author_nip` field
+- `bx_tasks_scores_track` table, `author_nip` field
+- `bx_tasks_views_track` table, `viewer_nip` field
+- `bx_tasks_votes_track` table, `author_nip` field
+- `bx_timeline_reactions_track` table, `author_nip` field
+- `bx_timeline_reports_track` table, `author_nip` field
+- `bx_timeline_reposts_track` table, `author_nip` field
+- `bx_timeline_scores_track` table, `author_nip` field
+- `bx_timeline_views_track` table, `viewer_nip` field
+- `bx_timeline_votes_track` table, `author_nip` field
+- `bx_videos_reactions_track` table, `author_nip` field
+- `bx_videos_reports_track` table, `author_nip` field
+- `bx_videos_scores_track` table, `author_nip` field
+- `bx_videos_svotes_track` table, `author_nip` field
+- `bx_videos_views_track` table, `viewer_nip` field
+- `bx_videos_votes_track` table, `author_nip` field
+- `sys_cmts_reactions_track` table, `author_nip` field
+- `sys_cmts_reports_track` table, `author_nip` field
+- `sys_cmts_scores_track` table, `author_nip` field
+- `sys_cmts_votes_track` table, `author_nip` field
+
+## Images EXIF info
+- `bx_albums_files2albums` table, `exif` table
+- `bx_photos_entries` table, `exif` table
+
+## Profiles IDs from other sites
+- `bx_dolcon_accounts` table, `remote_profile` field, Dolphin based sites, Dolphin site URL is stored in `sys_options` table, record where `name` = 'bx_dolcon_url'
+- `bx_facebook_accounts` table, `fb_profile` field, Facebook profile ID
+- `bx_googlecon_accounts` table, `remote_profile` field, Google profile ID	- `bx_linkedin_accounts` table, `remote_profile` field, LinkedIn profile ID
+- `bx_twitter_accounts` table, `remote_profile` field, Twitter profile ID
+- `bx_unacon_accounts` table, `remote_profile` field, other UNA based sites, UNA site URL is stored in `sys_options` table, record where `name` = 'bx_unacon_url'
+
+## Sensitive data
+- `sys_options` table, `value` field for record where `name` = 'bx_dolcon_secret'
+- `sys_options` table, `value` field for record where `name` = 'bx_unacon_secret'
+- `sys_options` table, `value` field for record where `name` = 'bx_stripe_connect_api_secret_test'
+- `sys_options` table, `value` field for record where `name` = 'bx_stripe_connect_api_secret_live'
+- `sys_options` table, `value` field for record where `name` = 'bx_smtp_password'
+- `sys_options` table, `value` field for record where `name` = 'bx_mailchimp_option_api_key'
+- `sys_options` table, `value` field for record where `name` = 'bx_twitter_secret'
+- `sys_options` table, `value` field for record where `name` = 'bx_linkedin_secret'
+- `sys_options` table, `value` field for record where `name` = 'bx_googlecon_secret'
+- `sys_options` table, `value` field for record where `name` = 'bx_intercom_option_api_key'
+- `sys_options` table, `value` field for record where `name` = 'bx_datafox_secret'
+- `sys_options` table, `value` field for record where `name` = 'bx_facebook_connect_secret'
+- `sys_options` table, `value` field for record where `name` = 'bx_antispam_toxicity_filter_api_key'
+- `sys_options` table, `value` field for record where `name` = 'bx_antispam_stopforumspam_api_key'
+- `sys_options` table, `value` field for record where `name` = 'bx_antispam_akismet_api_key'
+- `sys_options` table, `value` field for record where `name` = 'sys_maps_api_key'
+- `sys_options` table, `value` field for record where `name` = 'sys_twilio_gate_token'
+- `sys_options` table, `value` field for record where `name` = 'sys_push_rest_api'
+- `sys_options` table, `value` field for record where `name` = 'sys_push_app_id'
+- `sys_options` table, `value` field for record where `name` = 'sys_storage_s3_secret_key'
+- `sys_options` table, `value` field for record where `name` = 'sys_recaptcha_key_private'
+- `sys_options` table, `value` field for record where `name` = 'sys_iframely_api_key'
+- `sys_options` table, `value` field for record where `name` = 'sys_embedly_api_key'
+- `sys_options` table, `value` field for record where `name` = 'sys_oauth_secret'
+- `sys_options` table, `value` field for record where `name` = 'sys_ftp_password'
+- `bx_oauth_access_tokens` table, `access_token` field
+- `bx_oauth_authorization_codes` table, `authorization_code` field
+- `bx_oauth_clients` table, `client_secret` field
+- `bx_oauth_refresh_tokens` table, `refresh_token` field
+- `bx_payment_user_values` table, `value` field 
+- `bx_shopify_settings` table, `access_token` field
+- `bx_stripe_connect_accounts`, `access_token` and `refresh_token` fields
+- `sys_keys`, `key` field
+- `sys_sessions`, `id` field	
+
+## Caches and queues
+- `sys_sessions`
+- `bx_notifications_queue`
+- `bx_timeline_cache`
+- `sys_queue_email`
+- `sys_queue_push`
+- `sys_storage_deletions`
+- `sys_storage_tokens`
+- `sys_transcoder_queue`
+
+

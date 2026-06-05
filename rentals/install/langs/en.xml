@@ -110,4 +110,39 @@
     <!-- Notification action text strings -->
     <string name="_sa_rentals_notification_added"><![CDATA[posted a new rental listing]]></string>
     <string name="_sa_rentals_notification_edited"><![CDATA[updated their rental listing]]></string>
+    <!-- ACL action titles -->
+    <string name="_acl_txt_sa_rentals_view_entry"><![CDATA[View rental listing]]></string>
+    <string name="_acl_txt_sa_rentals_create_entry"><![CDATA[Post a rental listing]]></string>
+    <string name="_acl_txt_sa_rentals_edit_own_entry"><![CDATA[Edit own rental listing]]></string>
+    <string name="_acl_txt_sa_rentals_edit_any_entry"><![CDATA[Edit any rental listing]]></string>
+    <string name="_acl_txt_sa_rentals_delete_own_entry"><![CDATA[Delete own rental listing]]></string>
+    <string name="_acl_txt_sa_rentals_delete_any_entry"><![CDATA[Delete any rental listing]]></string>
+    <string name="_acl_txt_sa_rentals_approve_entry"><![CDATA[Approve rental listing]]></string>
+    <string name="_acl_txt_sa_rentals_feature_entry"><![CDATA[Feature/pin rental listing]]></string>
+    <!-- Feature toggle option captions -->
+    <string name="_sa_rentals_opt_require_tenant_reg"><![CDATA[Require tenant registration before contact]]></string>
+    <string name="_sa_rentals_opt_agent_verification"><![CDATA[Estate agent verification workflow]]></string>
+    <string name="_sa_rentals_opt_blacklisting"><![CDATA[Enable blacklisting]]></string>
+    <string name="_sa_rentals_opt_show_banners"><![CDATA[Show education banners for disabled features]]></string>
+    <string name="_sa_rentals_opt_moderation"><![CDATA[Require admin approval for new listings]]></string>
+    <!-- Moderation / pending -->
+    <string name="_sa_rentals_status_pending"><![CDATA[Pending Approval]]></string>
+    <string name="_sa_rentals_pending_submitted"><![CDATA[Your listing has been submitted and is awaiting approval. You will be notified once it goes live.]]></string>
+    <!-- Admin manage page -->
+    <string name="_sa_rentals_page_admin"><![CDATA[Manage Rental Listings]]></string>
+    <string name="_sa_rentals_page_admin_sys"><![CDATA[Manage Rental Listings]]></string>
+    <string name="_sa_rentals_block_admin"><![CDATA[Manage Listings]]></string>
+    <string name="_sa_rentals_admin_all"><![CDATA[All Listings]]></string>
+    <string name="_sa_rentals_admin_approve"><![CDATA[Approve]]></string>
+    <string name="_sa_rentals_admin_feature"><![CDATA[Feature]]></string>
+    <string name="_sa_rentals_admin_unfeature"><![CDATA[Unfeature]]></string>
+    <string name="_sa_rentals_admin_approved"><![CDATA[Listing approved and set to available.]]></string>
+    <string name="_sa_rentals_admin_featured"><![CDATA[Listing is now featured.]]></string>
+    <string name="_sa_rentals_admin_unfeatured"><![CDATA[Listing is no longer featured.]]></string>
+    <string name="_sa_rentals_admin_deleted"><![CDATA[Listing deleted.]]></string>
+    <string name="_sa_rentals_admin_confirm_delete"><![CDATA[Delete this listing permanently?]]></string>
+    <string name="_sa_rentals_admin_col_id"><![CDATA[ID]]></string>
+    <string name="_sa_rentals_admin_col_featured"><![CDATA[Featured]]></string>
+    <string name="_sa_rentals_admin_col_created"><![CDATA[Posted]]></string>
+    <string name="_sa_rentals_admin_col_actions"><![CDATA[Actions]]></string>
 </resources>

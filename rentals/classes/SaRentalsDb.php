@@ -67,6 +67,14 @@ class SaRentalsDb extends BxDolModuleDb
         if ($iViewerId && (int)$aListing['author_id'] === $iViewerId)
             return true;
 
+        // Moderators and admins can always view any listing
+        if ($iViewerId && BxDolAcl::getInstance()->isAllowed('sa_rentals', 'edit any entry', false))
+            return true;
+
+        // Pending listings are only visible to their author and admins (handled above)
+        if (!empty($aListing['status']) && $aListing['status'] === 'pending')
+            return false;
+
         $sVisibility = (isset($aListing['visibility']) && $aListing['visibility'] !== '')
             ? $aListing['visibility']
             : 'public';
@@ -98,6 +106,8 @@ class SaRentalsDb extends BxDolModuleDb
     function getListings($aFilter = array())
     {
         $sWhere = "WHERE 1";
+        // Never show pending listings in public browse
+        $sWhere .= ' AND `status` != "pending"';
         if (!empty($aFilter['province']))
             $sWhere .= ' AND `province` = "' . $this->escape($aFilter['province']) . '"';
         if (!empty($aFilter['property_type']))
@@ -133,6 +143,25 @@ class SaRentalsDb extends BxDolModuleDb
     function getListingsByAuthor($iAuthorId)
     {
         return $this->getAll("SELECT * FROM `sa_rentals_listings` WHERE `author_id` = " . (int)$iAuthorId . " ORDER BY `created` DESC");
+    }
+
+    function getListingsAdmin($aFilter = array())
+    {
+        $sWhere = "WHERE 1";
+        if (!empty($aFilter['status']))
+            $sWhere .= ' AND `status` = "' . $this->escape($aFilter['status']) . '"';
+        return $this->getAll("SELECT * FROM `sa_rentals_listings` $sWhere ORDER BY `featured` DESC, `created` DESC");
+    }
+
+    function approveListing($iId)
+    {
+        return $this->query("UPDATE `sa_rentals_listings` SET `status` = 'available' WHERE `id` = " . (int)$iId . " AND `status` = 'pending'");
+    }
+
+    function featureListing($iId, $bFeatured)
+    {
+        $iVal = $bFeatured ? 1 : 0;
+        return $this->query("UPDATE `sa_rentals_listings` SET `featured` = $iVal WHERE `id` = " . (int)$iId);
     }
 
     function incrementViews($iId)

@@ -298,19 +298,27 @@ class SaWardCouncilorModule extends BxDolModule
         }
 
         // 4. Auto-detect: logged-in member belongs to exactly one space
+        //    Resolution chain: bx_spaces_fans.content (profile_id) ->
+        //                      sys_profiles.id -> bx_spaces_data.content_id
         if(isLogged()) {
             $iProfileId = (int)bx_get_logged_profile_id();
             $oDb = BxDolDb::getInstance();
             $aSpaces = $oDb->getAll(
                 $oDb->prepare(
-                    "SELECT `content` FROM `bx_spaces_fans`
-                     WHERE `initiator` = ? AND `mutual` = 1
+                    "SELECT p.id AS profile_id
+                     FROM bx_spaces_fans c
+                     JOIN sys_profiles p ON p.id = c.content
+                          AND p.type = 'bx_spaces' AND p.status = 'active'
+                     JOIN bx_spaces_data d ON d.id = p.content_id
+                          AND d.status = 'active'
+                     WHERE c.initiator = ?
+                       AND c.mutual = 1
                      LIMIT 2",
                     $iProfileId
                 )
             );
             if(count($aSpaces) === 1) {
-                return (int)$aSpaces[0]['content'];
+                return (int)$aSpaces[0]['profile_id'];
             }
         }
 
@@ -432,7 +440,60 @@ class SaWardCouncilorModule extends BxDolModule
         return $sHtml;
     }
 
+    /**
+     * Decide which community prompt to show based on the logged-in member's
+     * joined spaces. Branches into:
+     *   CASE 1 — 0 joined spaces    → full Country→Province→City→Community cascade
+     *   CASE 2 — ≥1 joined spaces  → simple dropdown of joined spaces + "View Ward Portal"
+     *
+     * Guests (not logged in) fall into CASE 1 (cascade) since they have 0 joined
+     * spaces. Exactly 1 joined space is short-circuited upstream by
+     * _getCurrentSpaceId() auto-detect, so it never reaches this method.
+     *
+     * @return string HTML
+     */
     private function _getCommunityPrompt()
+    {
+        $oDb = BxDolDb::getInstance();
+        $iLoggedProfileId = isLogged() ? (int)bx_get_logged_profile_id() : 0;
+
+        $aJoinedSpaces = array();
+        if($iLoggedProfileId > 0) {
+            $aJoinedSpaces = $oDb->getAll(
+                $oDb->prepare(
+                    "SELECT p.id AS profile_id,
+                            d.id AS content_id,
+                            d.space_name
+                     FROM bx_spaces_fans c
+                     JOIN sys_profiles p ON p.id = c.content
+                          AND p.type = 'bx_spaces' AND p.status = 'active'
+                     JOIN bx_spaces_data d ON d.id = p.content_id
+                          AND d.status = 'active'
+                     WHERE c.initiator = ?
+                       AND c.mutual = 1
+                     ORDER BY d.space_name ASC",
+                    $iLoggedProfileId
+                )
+            );
+        }
+
+        $iJoinedCount = is_array($aJoinedSpaces) ? count($aJoinedSpaces) : 0;
+
+        if($iJoinedCount === 0) {
+            return $this->_renderCommunityCascade();
+        }
+
+        return $this->_renderJoinedSpacesDropdown($aJoinedSpaces);
+    }
+
+    /**
+     * CASE 1: Member has NO joined spaces. Render the full 4-level cascade
+     * (Country → Province → City → Community) so they can locate and join
+     * a community. The lowest selected level is submitted as profile_id.
+     *
+     * @return string HTML
+     */
+    private function _renderCommunityCascade()
     {
         $oDb = BxDolDb::getInstance();
 
@@ -500,6 +561,46 @@ class SaWardCouncilorModule extends BxDolModule
         $sHtml .= '          || document.getElementById("wc-sel-country").value;';
         $sHtml .= '  if(!iId) { alert("Please select your community from the list first."); return; }';
         $sHtml .= '  window.location.href = "page.php?i=view-space-profile&profile_id=" + iId;';
+        $sHtml .= '}';
+        $sHtml .= '</script>';
+        $sHtml .= '</div>';
+
+        return $sHtml;
+    }
+
+    /**
+     * CASE 2: Member has ≥1 joined spaces. Render a simple dropdown of the
+     * spaces they belong to, plus a "View Ward Portal" button that takes
+     * them to the selected space's profile.
+     *
+     * @param array $aJoinedSpaces Rows with profile_id, content_id, space_name
+     * @return string HTML
+     */
+    private function _renderJoinedSpacesDropdown($aJoinedSpaces)
+    {
+        $sOptions = '';
+        foreach($aJoinedSpaces as $aS) {
+            $iProfileId = (int)$aS['profile_id'];
+            $sOptions .= '<option value="' . $iProfileId . '">&#127968; ' . htmlspecialchars($aS['space_name']) . '</option>';
+        }
+
+        $sHtml  = '<div class="wc-community-prompt wc-joined-spaces" style="background:var(--color-bg-block,#1a1a2e);border:1px solid var(--color-box-border,#333);border-radius:8px;padding:24px;text-align:center;">';
+        $sHtml .= '<div style="font-size:48px;margin-bottom:16px;">&#127968;</div>';
+        $sHtml .= '<h3 style="margin:0 0 8px;color:var(--color-text-block,#fff);">Select Your Community</h3>';
+        $sHtml .= '<p style="margin:0 0 20px;color:var(--color-text-block,#fff);">Choose one of your joined communities to open its ward portal.</p>';
+        $sHtml .= '<div style="max-width:360px;margin:0 auto;">';
+        $sHtml .= '<select id="wc-sel-joined-space" style="background:var(--color-bg-block-secondary,#2a2a3e);color:var(--color-text-block,#fff);border:1px solid var(--color-box-border,#444);padding:10px 12px;border-radius:4px;width:100%;margin-bottom:12px;">';
+        $sHtml .= '<option value="">-- Choose a community --</option>';
+        $sHtml .= $sOptions;
+        $sHtml .= '</select>';
+        $sHtml .= '<button type="button" onclick="wcViewWardPortal()" class="bx-btn bx-btn-primary" style="width:100%;">View Ward Portal</button>';
+        $sHtml .= '</div>';
+        $sHtml .= '<script>';
+        $sHtml .= 'function wcViewWardPortal() {';
+        $sHtml .= '  var oSel = document.getElementById("wc-sel-joined-space");';
+        $sHtml .= '  var iId = oSel ? parseInt(oSel.value, 10) : 0;';
+        $sHtml .= '  if(!iId) { alert("Please select a community first."); return; }';
+        $sHtml .= '  window.location.href = "page.php?i=ward-councilor-dashboard&space_id=" + iId;';
         $sHtml .= '}';
         $sHtml .= '</script>';
         $sHtml .= '</div>';
@@ -1688,8 +1789,8 @@ class SaWardCouncilorModule extends BxDolModule
         }
         $sSpaceOptions = '<option value="">🌍 Select a ward/space...</option>';
         foreach($aSpaces as $aSpace) {
-            $sSelected = ($iSpaceId == $aSpace['id']) ? ' selected' : '';
-            $sSpaceOptions .= '<option value="' . $aSpace['id'] . '"' . $sSelected . '>🏠 ' . htmlspecialchars($aSpace['title']) . '</option>';
+            $sSelected = ((int)$iSpaceId === (int)$aSpace['profile_id']) ? ' selected' : '';
+            $sSpaceOptions .= '<option value="' . (int)$aSpace['profile_id'] . '"' . $sSelected . '>🏠 ' . htmlspecialchars($aSpace['title']) . '</option>';
         }
 
         // Build form content
@@ -1752,7 +1853,7 @@ class SaWardCouncilorModule extends BxDolModule
                 <input type="hidden" name="space_id" value="' . (int)$iSpaceId . '">
                 <div class="wc-form-group">
                     <label>Select Ward/Space</label>
-                    <select name="ward_space_id" class="wc-form-control" onchange="window.location.href=\'page.php?i=ward-manage&manage_tab=ward_info&ward_space_id=\'+this.value">
+                    <select name="ward_space_id" class="wc-form-control" style="background:var(--color-bg-block-secondary,#2a2a3e);color:var(--color-text-block,#fff);border:1px solid var(--color-box-border,#444);padding:10px 12px;border-radius:4px;width:100%;" onchange="window.location.href=\'page.php?i=ward-manage&manage_tab=ward_info&ward_space_id=\'+this.value">
                         ' . $sSpaceOptions . '
                     </select>
                 </div>

@@ -1,0 +1,5 @@
+Data needs categorisation. UNA now features metadata format called "Hashtags". They're non-hierarchical keywords that can be created just by adding # (hash) symbol before any word within a post. Simple as that. Once content is posted hashtags turn into links that show all posts or other data with those hashtags. Unlike with the "old-fashioned" meta-tags there's no need for a separate input form. Keywords are created while typing the main content body. This concept is particularly popular with Twitter, but is rapidly becoming popular on Facebook and other social networks. Uninterrupted creative flow FTW!
+
+[[/images/hashtags.png|alt=Hashtags]]
+
+See how hashtags cohesively work within context of every sentence. Readers are often"blind" to meta-data links, not even looking at them sometimes, because they're just not part of the content. Hashtags are part of content; they are highly engaging and creating them is both easy and addictive! 
