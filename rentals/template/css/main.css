@@ -336,3 +336,61 @@
 .sar-admin-act-feature  { background: rgba(240,165,0,0.15); color: #b07800 !important; border-color: rgba(240,165,0,0.4) !important; }
 .sar-admin-act-unfeature { background: rgba(120,120,120,0.1); color: #666 !important; border-color: rgba(120,120,120,0.3) !important; }
 .sar-admin-act-delete  { background: rgba(200,64,64,0.1); color: #c84040 !important; border-color: rgba(200,64,64,0.3) !important; }
+
+/* ── Phase 1 Enhancement styles ── */
+
+/* Verified badge — detail page (large) */
+.sar-badge-verified {
+    display: inline-block;
+    background: rgba(0,122,77,0.15); color: var(--bx-def-color-primary, #007a4d);
+    border: 1px solid var(--bx-def-color-primary, #007a4d);
+    font-size: 11px; padding: 3px 10px;
+    border-radius: 12px; font-weight: 700; margin-left: 6px;
+}
+
+/* Verified badge — card (small) */
+.sar-badge-verified-sm {
+    display: inline-block;
+    background: rgba(0,122,77,0.12); color: var(--bx-def-color-primary, #007a4d);
+    font-size: 10px; padding: 2px 7px;
+    border-radius: 10px; font-weight: 700; vertical-align: middle;
+}
+
+/* Featured badge — card (small inline star) */
+.sar-featured-sm {
+    font-size: 13px; vertical-align: middle; margin-right: 2px;
+}
+
+/* WhatsApp button — detail contact block */
+.sar-btn-whatsapp {
+    display: inline-block; margin-top: 8px; padding: 9px 18px;
+    background: #25d366 !important; color: #fff !important;
+    border-radius: 4px; text-decoration: none;
+    font-weight: 600; font-size: 13px;
+}
+.sar-btn-whatsapp:hover { background: #1ebe5d !important; }
+
+/* WhatsApp quick-link on card */
+.sar-card-wa {
+    display: inline-block; color: #25d366 !important;
+    font-size: 16px; text-decoration: none;
+    vertical-align: middle; margin-left: 4px;
+}
+
+/* Card badges row */
+.sar-card-badges {
+    display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 6px;
+}
+
+/* Expiry / reminder notice (owner only) */
+.sar-notice {
+    background: rgba(240,165,0,0.1) !important; color: #b07800;
+    padding: 10px 14px; border-radius: 4px; margin-bottom: 14px;
+    border: 1px solid rgba(240,165,0,0.35) !important; font-size: 13px;
+}
+
+/* Admin verify action */
+.sar-admin-act-verify {
+    background: rgba(0,122,77,0.1); color: #007a4d !important;
+    border-color: rgba(0,122,77,0.3) !important;
+}

@@ -68,7 +68,7 @@ class SaRentalsDb extends BxDolModuleDb
             return true;
 
         // Moderators and admins can always view any listing
-        if ($iViewerId && BxDolAcl::getInstance()->isAllowed('sa_rentals', 'edit any entry', false))
+        if ($iViewerId && BxDolAcl::getInstance()->isMemberLevelInSet(array(7, 8)))
             return true;
 
         // Pending listings are only visible to their author and admins (handled above)
@@ -197,5 +197,69 @@ class SaRentalsDb extends BxDolModuleDb
     {
         $aRows = $this->getAll("SELECT f.`content` FROM `bx_groups_fans` f WHERE f.`initiator` = " . (int)$iUserId . " AND f.`mutual` = 1");
         return array_column($aRows, 'content');
+    }
+
+    // ─── Phase 1 Enhancement helpers ──────────────────────────────────────────
+
+    /**
+     * Count active (non-expired, non-pending) listings by author.
+     * Used for quota enforcement before allowing a new listing to be created.
+     */
+    function getActiveListingCountByAuthor($iAuthorId)
+    {
+        $aRow = $this->getRow("SELECT COUNT(*) AS `cnt` FROM `sa_rentals_listings`
+            WHERE `author_id` = " . (int)$iAuthorId . "
+            AND `status` NOT IN ('pending', 'taken')");
+        return isset($aRow['cnt']) ? (int)$aRow['cnt'] : 0;
+    }
+
+    /**
+     * Count uploaded photos for a listing (comma-separated ids in media_storage_ids).
+     */
+    function getPhotoCountForListing($iListingId)
+    {
+        $aRow = $this->getRow("SELECT `media_storage_ids` FROM `sa_rentals_listings` WHERE `id` = " . (int)$iListingId);
+        if (empty($aRow['media_storage_ids'])) return 0;
+        $aIds = array_filter(explode(',', $aRow['media_storage_ids']));
+        return count($aIds);
+    }
+
+    /**
+     * Mark a listing as expired (status = inactive equivalent — we use 'taken' is wrong,
+     * so we add a soft 'hold' and rely on the expires_at column for display messaging).
+     * Does NOT delete — owner can still renew.
+     */
+    function expireListing($iId)
+    {
+        return $this->query("UPDATE `sa_rentals_listings` SET `status` = 'hold'
+            WHERE `id` = " . (int)$iId . " AND `status` = 'available'");
+    }
+
+    /**
+     * Set or clear the verified badge on a listing.
+     */
+    function verifyListing($iId, $iAdminId)
+    {
+        return $this->query("UPDATE `sa_rentals_listings`
+            SET `verified` = 1, `verified_by` = " . (int)$iAdminId . ", `verified_at` = NOW()
+            WHERE `id` = " . (int)$iId);
+    }
+
+    function unverifyListing($iId)
+    {
+        return $this->query("UPDATE `sa_rentals_listings`
+            SET `verified` = 0, `verified_by` = 0, `verified_at` = NULL
+            WHERE `id` = " . (int)$iId);
+    }
+
+    /**
+     * Count how many enquiries a tenant has sent today (throttle check).
+     */
+    function getEnquiryCountToday($iTenantId)
+    {
+        $aRow = $this->getRow("SELECT COUNT(*) AS `cnt` FROM `sa_rentals_enquiries`
+            WHERE `tenant_id` = " . (int)$iTenantId . "
+            AND DATE(`created`) = CURDATE()");
+        return isset($aRow['cnt']) ? (int)$aRow['cnt'] : 0;
     }
 }

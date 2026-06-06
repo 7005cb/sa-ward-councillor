@@ -124,6 +124,9 @@ class SaRentalsModule extends BxDolModule
 
         $this->_oDb->incrementViews($iId);
 
+        // Auto-expire if past expires_at
+        $this->_checkExpiry($a);
+
         // Media gallery
         $sGallery = '';
         if (!empty($a['media_storage_ids'])) {
@@ -185,7 +188,13 @@ class SaRentalsModule extends BxDolModule
         // Contact block + direct message
         $sContact = '<div class="sar-contact"><h3>' . _t('_sa_rentals_contact_landlord') . '</h3>';
         if (!empty($a['contact_phone']))    $sContact .= '<p>&#128222; <a href="tel:' . bx_html_attribute($a['contact_phone']) . '">' . htmlspecialchars($a['contact_phone']) . '</a></p>';
-        if (!empty($a['contact_whatsapp'])) $sContact .= '<p>&#128241; <a href="https://wa.me/' . preg_replace('/[^0-9]/', '', $a['contact_whatsapp']) . '" target="_blank">WhatsApp: ' . htmlspecialchars($a['contact_whatsapp']) . '</a></p>';
+        // WhatsApp button — controlled by sys_options toggle
+        if (!empty($a['contact_whatsapp']) && getParam('sa_rentals_whatsapp_enabled')) {
+            $sWaNumber = preg_replace('/[^0-9]/', '', $a['contact_whatsapp']);
+            $sContact .= '<p><a href="https://wa.me/' . $sWaNumber . '" target="_blank" rel="noopener" class="sar-btn-whatsapp">&#128241; ' . _t('_sa_rentals_btn_whatsapp') . '</a></p>';
+        } elseif (!empty($a['contact_whatsapp'])) {
+            $sContact .= '<p>&#128241; ' . htmlspecialchars($a['contact_whatsapp']) . '</p>';
+        }
         if (!empty($a['contact_email']))    $sContact .= '<p>&#9993; <a href="mailto:' . bx_html_attribute($a['contact_email']) . '">' . htmlspecialchars($a['contact_email']) . '</a></p>';
         if (!empty($a['contact']))          $sContact .= '<p>' . htmlspecialchars($a['contact']) . '</p>';
         // Direct message button — only show if viewer is logged in and not the owner
@@ -195,13 +204,27 @@ class SaRentalsModule extends BxDolModule
         $sContact .= '</div>';
 
         $sFeatured  = $a['featured'] ? '<span class="sar-featured">&#11088; Featured</span>' : '';
+        $sVerified  = (!empty($a['verified']) && getParam('sa_rentals_verified_badge'))
+            ? '<span class="sar-badge-verified">&#10003; ' . _t('_sa_rentals_badge_verified') . '</span>' : '';
         $sGroupTag  = ($a['group_id'] > 0) ? '<span class="sar-group-tag">&#128101; Community Listing</span>' : '';
         $sSpaceTag  = ($a['space_id'] > 0) ? '<span class="sar-space-tag">&#127968; Space Listing</span>' : '';
 
+        // Expiry notice for the listing owner
+        $sExpiryNotice = '';
+        if ($iUserId && (int)$a['author_id'] === $iUserId && !empty($a['expires_at'])) {
+            $iDaysLeft = (int)ceil((strtotime($a['expires_at']) - time()) / 86400);
+            $iReminderDays = (int)getParam('sa_rentals_expiry_reminder_days');
+            if ($iDaysLeft <= 0)
+                $sExpiryNotice = '<div class="sar-error">' . _t('_sa_rentals_msg_listing_expired') . '</div>';
+            elseif ($iReminderDays > 0 && $iDaysLeft <= $iReminderDays)
+                $sExpiryNotice = '<div class="sar-notice">&#9888; ' . _t('_sa_rentals_expires_label') . ': ' . htmlspecialchars($a['expires_at']) . ' (' . $iDaysLeft . ' days)</div>';
+        }
+
         return '<div class="sar-detail">' .
             $sGallery .
+            $sExpiryNotice .
             $sOwnerControls .
-            '<h1>' . htmlspecialchars($a['title']) . $sFeatured . '</h1>' .
+            '<h1>' . htmlspecialchars($a['title']) . $sFeatured . $sVerified . '</h1>' .
             $sGroupTag . $sSpaceTag .
             '<div class="sar-meta">
                 <span class="sar-card-badge">' . htmlspecialchars($a['property_type']) . '</span>
@@ -223,6 +246,15 @@ class SaRentalsModule extends BxDolModule
         $this->_oTemplate->addCss(array('main.css'));
         $iUserId = bx_get_logged_profile_id();
         if (!$iUserId) return '<p>' . _t('_sa_rentals_login_required') . '</p>';
+
+        // Require Landlord or Estate Agent level to post
+        if (!$this->_isAllowed('create entry'))
+            return '<div class="sar-form-wrap"><div class="sar-error">' . _t('_sa_rentals_msg_upgrade_required') . '</div></div>';
+
+        // Quota check — block if over limit for their level
+        if (!$this->_checkListingQuota($iUserId))
+            return '<div class="sar-form-wrap"><div class="sar-error">' . _t('_sa_rentals_msg_quota_reached') . '</div></div>';
+
         $sMsg = '';
         $aValues = array();
 
@@ -235,6 +267,10 @@ class SaRentalsModule extends BxDolModule
                 // Moderation toggle: if enabled, new listings start as 'pending'
                 if (getParam('sa_rentals_moderation') == 'on')
                     $aData['status'] = 'pending';
+                // Set expiry date from Studio setting (0 = never)
+                $iExpiryDays = (int)getParam('sa_rentals_expiry_days');
+                if ($iExpiryDays > 0)
+                    $aData['expires_at'] = date('Y-m-d', strtotime('+' . $iExpiryDays . ' days'));
                 $bResult = $this->_oDb->addListing($aData);
                 $iListingId = $this->_oDb->getLastInsertId();
                 if ($bResult && $iListingId > 0) {
@@ -407,8 +443,15 @@ class SaRentalsModule extends BxDolModule
         if (!empty($aListing['media_storage_ids']))
             $aExisting = array_filter(explode(',', $aListing['media_storage_ids']));
         $aFileIds = $aExisting;
+
+        // Enforce photo quota from sys_options
+        $iPhotoQuota = $this->_getPhotoQuota($iUserId);
+        $iCurrentCount = count($aFileIds);
+
         foreach ($_FILES['media']['name'] as $k => $sName) {
             if (empty($sName)) continue;
+            // Stop if quota reached (0 = unlimited)
+            if ($iPhotoQuota > 0 && $iCurrentCount >= $iPhotoQuota) break;
             $aFile = array(
                 'name'     => $_FILES['media']['name'][$k],
                 'type'     => $_FILES['media']['type'][$k],
@@ -417,7 +460,10 @@ class SaRentalsModule extends BxDolModule
                 'size'     => $_FILES['media']['size'][$k],
             );
             $iFileId = $oStorage->storeFileFromForm($aFile, false, $iUserId);
-            if ($iFileId) $aFileIds[] = $iFileId;
+            if ($iFileId) {
+                $aFileIds[] = $iFileId;
+                $iCurrentCount++;
+            }
         }
         if (!empty($aFileIds))
             $this->_oDb->updateListing($iListingId, array('media_storage_ids' => implode(',', $aFileIds)));
@@ -610,15 +656,27 @@ class SaRentalsModule extends BxDolModule
                 }
             }
         }
+        $sVerifiedBadge = (!empty($a['verified']) && getParam('sa_rentals_verified_badge'))
+            ? '<span class="sar-badge-verified-sm">&#10003; ' . _t('_sa_rentals_badge_verified') . '</span>' : '';
+        $sFeaturedBadge = $a['featured'] ? '<span class="sar-featured-sm">&#11088;</span>' : '';
+        // WhatsApp quick-contact on card (number only — no full button to keep card compact)
+        $sWaBtn = '';
+        if (!empty($a['contact_whatsapp']) && getParam('sa_rentals_whatsapp_enabled')) {
+            $sWaNum = preg_replace('/[^0-9]/', '', $a['contact_whatsapp']);
+            $sWaBtn = '<a href="https://wa.me/' . $sWaNum . '" target="_blank" rel="noopener" class="sar-card-wa" onclick="event.stopPropagation()">&#128241;</a>';
+        }
         return '<div class="sar-card">
             <a href="' . BX_DOL_URL_ROOT . 'page.php?i=view-rentals-listing&id=' . $a['id'] . '">' . $sThumb . '
             <div class="sar-card-body">
-                <span class="sar-card-badge">' . htmlspecialchars($a['property_type']) . '</span>
-                <span class="sar-status sar-status-' . $sColor . '">' . _t('_sa_rentals_status_' . $a['status']) . '</span>
+                <div class="sar-card-badges">
+                    <span class="sar-card-badge">' . htmlspecialchars($a['property_type']) . '</span>
+                    <span class="sar-status sar-status-' . $sColor . '">' . _t('_sa_rentals_status_' . $a['status']) . '</span>
+                    ' . $sFeaturedBadge . $sVerifiedBadge . '
+                </div>
                 <h3>' . htmlspecialchars($a['title']) . '</h3>
                 <div class="sar-card-location">&#128205; ' . htmlspecialchars($a['city']) . ', ' . htmlspecialchars($a['province']) . '</div>
                 <div class="sar-card-price">R ' . number_format((float)$a['rent_zar'], 2) . ' /month</div>
-                <div class="sar-card-meta">&#128065; ' . (int)$a['views_count'] . ' &nbsp; &#128716; ' . $a['bedrooms'] . ' bed</div>
+                <div class="sar-card-meta">&#128065; ' . (int)$a['views_count'] . ' &nbsp; &#128716; ' . $a['bedrooms'] . ' bed ' . $sWaBtn . '</div>
             </div></a>
         </div>';
     }
@@ -631,8 +689,8 @@ class SaRentalsModule extends BxDolModule
         $iUserId = bx_get_logged_profile_id();
 
         // Only moderators and admins
-        if (!BxDolAcl::getInstance()->isAllowed('sa_rentals', 'approve entry', false)
-            && !BxDolAcl::getInstance()->isAllowed('sa_rentals', 'edit any entry', false))
+        if (!$this->_isAllowed('approve entry')
+            && !$this->_isAllowed('edit any entry'))
             return '<p>' . _t('_sa_rentals_no_permission') . '</p>';
 
         // Handle actions
@@ -668,10 +726,20 @@ class SaRentalsModule extends BxDolModule
                         $sMsg = '<div class="sar-success">' . _t('_sa_rentals_admin_deleted') . '</div>';
                     }
                     break;
+                case 'verify':
+                    if ($this->_isAllowed('verify listing')) {
+                        $this->_oDb->verifyListing($iTargetId, $iUserId);
+                        $sMsg = '<div class="sar-success">' . _t('_sa_rentals_admin_verified') . '</div>';
+                    }
+                    break;
+                case 'unverify':
+                    if ($this->_isAllowed('verify listing')) {
+                        $this->_oDb->unverifyListing($iTargetId);
+                        $sMsg = '<div class="sar-success">' . _t('_sa_rentals_admin_unverified') . '</div>';
+                    }
+                    break;
             }
         }
-
-        // Filter
         $sStatusFilter = bx_process_input(bx_get('sar_status'), BX_DATA_TEXT);
         $aFilter = array();
         if ($sStatusFilter) $aFilter['status'] = $sStatusFilter;
@@ -720,6 +788,12 @@ class SaRentalsModule extends BxDolModule
                 $sActions .= ' <a href="' . $sBaseUrl . '&sar_action=unfeature&sar_id=' . $iId . '&sar_status=' . urlencode($sStatusFilter) . '" class="sar-admin-act sar-admin-act-unfeature">' . _t('_sa_rentals_admin_unfeature') . '</a>';
             else
                 $sActions .= ' <a href="' . $sBaseUrl . '&sar_action=feature&sar_id=' . $iId . '&sar_status=' . urlencode($sStatusFilter) . '" class="sar-admin-act sar-admin-act-feature">' . _t('_sa_rentals_admin_feature') . '</a>';
+            if (getParam('sa_rentals_verified_badge')) {
+                if (!empty($a['verified']))
+                    $sActions .= ' <a href="' . $sBaseUrl . '&sar_action=unverify&sar_id=' . $iId . '&sar_status=' . urlencode($sStatusFilter) . '" class="sar-admin-act sar-admin-act-unfeature">' . _t('_sa_rentals_admin_unverify') . '</a>';
+                else
+                    $sActions .= ' <a href="' . $sBaseUrl . '&sar_action=verify&sar_id=' . $iId . '&sar_status=' . urlencode($sStatusFilter) . '" class="sar-admin-act sar-admin-act-verify">' . _t('_sa_rentals_admin_verify') . '</a>';
+            }
             $sActions .= ' <a href="' . $sBaseUrl . '&sar_action=delete&sar_id=' . $iId . '&sar_status=' . urlencode($sStatusFilter) . '" class="sar-admin-act sar-admin-act-delete" onclick="return confirm(\'' . _t('_sa_rentals_admin_confirm_delete') . '\')">' . _t('_sa_rentals_delete') . '</a>';
 
             $sTable .= '<tr>
@@ -742,7 +816,7 @@ class SaRentalsModule extends BxDolModule
 
     public function checkAllowView($iEntryId)
     {
-        if (!BxDolAcl::getInstance()->isAllowed('sa_rentals', 'view entry', false))
+        if (!$this->_isAllowed('view entry'))
             return false;
         $aEntry = $this->_oDb->getListing($iEntryId);
         if (!$aEntry)
@@ -756,9 +830,9 @@ class SaRentalsModule extends BxDolModule
     {
         $aEntry = $this->_oDb->getListing($iEntryId);
         $iProfileId = bx_get_logged_profile_id();
-        if (BxDolAcl::getInstance()->isAllowed('sa_rentals', 'edit any entry', false))
+        if ($this->_isAllowed('edit any entry'))
             return true;
-        if (BxDolAcl::getInstance()->isAllowed('sa_rentals', 'edit own entry', false)
+        if ($this->_isAllowed('edit own entry')
             && (int)$aEntry['author_id'] === (int)$iProfileId)
             return true;
         return false;
@@ -768,9 +842,9 @@ class SaRentalsModule extends BxDolModule
     {
         $aEntry = $this->_oDb->getListing($iEntryId);
         $iProfileId = bx_get_logged_profile_id();
-        if (BxDolAcl::getInstance()->isAllowed('sa_rentals', 'delete any entry', false))
+        if ($this->_isAllowed('delete any entry'))
             return true;
-        if (BxDolAcl::getInstance()->isAllowed('sa_rentals', 'delete own entry', false)
+        if ($this->_isAllowed('delete own entry')
             && (int)$aEntry['author_id'] === (int)$iProfileId)
             return true;
         return false;
@@ -778,12 +852,12 @@ class SaRentalsModule extends BxDolModule
 
     public function checkAllowApprove($iEntryId)
     {
-        return BxDolAcl::getInstance()->isAllowed('sa_rentals', 'approve entry', false);
+        return $this->_isAllowed('approve entry');
     }
 
     public function checkAllowFeature($iEntryId)
     {
-        return BxDolAcl::getInstance()->isAllowed('sa_rentals', 'feature entry', false);
+        return $this->_isAllowed('feature entry');
     }
 
     // ─── Timeline Integration ──────────────────────────────────────────────────
@@ -912,5 +986,122 @@ class SaRentalsModule extends BxDolModule
             'image'   => '',
             'author'  => (int)$aEntry['author_id'],
         );
+    }
+
+    // ─── Phase 1 Enhancement helpers ──────────────────────────────────────────
+
+    /**
+     * Auto-expire a listing if its expires_at date is in the past.
+     * Called on every detail page load for the listing.
+     * Silently flips status to 'hold' so the owner still sees it in My Listings.
+     */
+    private function _checkExpiry($aListing)
+    {
+        if (empty($aListing['expires_at'])) return;
+        if ($aListing['status'] !== 'available') return;
+        if (strtotime($aListing['expires_at']) < time())
+            $this->_oDb->expireListing($aListing['id']);
+    }
+
+    private function _isAllowed($sAction)
+{
+    $iLandlordLevel = (int)getParam('sa_rentals_landlord_level_id');
+    $iAgentLevel    = (int)getParam('sa_rentals_agent_level_id');
+
+    // Moderator=7, Admin=8 always included
+    $aModAdmin = array(7, 8);
+
+    switch ($sAction) {
+        case 'view entry':
+            // Everyone logged in can view
+            return BxDolAcl::getInstance()->isMemberLevelInSet(
+                array_filter(array_merge(array(2, 3, 4, 5, 9, 10, 11, 12, 13,
+                    $iLandlordLevel, $iAgentLevel), $aModAdmin))
+            );
+        case 'create entry':
+            $aLevels = array_filter(array($iLandlordLevel, $iAgentLevel));
+            if (empty($aLevels)) return false;
+            return BxDolAcl::getInstance()->isMemberLevelInSet(
+                array_merge($aLevels, $aModAdmin)
+            );
+        case 'edit own entry':
+        case 'delete own entry':
+            $aLevels = array_filter(array($iLandlordLevel, $iAgentLevel));
+            if (empty($aLevels)) return false;
+            return BxDolAcl::getInstance()->isMemberLevelInSet(
+                array_merge($aLevels, $aModAdmin)
+            );
+        case 'edit any entry':
+        case 'delete any entry':
+        case 'approve entry':
+            return BxDolAcl::getInstance()->isMemberLevelInSet($aModAdmin);
+        case 'verify listing':
+        case 'feature entry':
+            // Admin only
+            return BxDolAcl::getInstance()->isMemberLevelInSet(array(8));
+        default:
+            return false;
+    }
+}
+    /**
+     * Returns true if the member is on the Estate Agent level.
+     * Reads the level ID from sys_options — 0 means not yet configured.
+     */
+    private function _isEstateAgent($iMemberId)
+    {
+        $iAgentLevelId = (int)getParam('sa_rentals_agent_level_id');
+        if ($iAgentLevelId === 0) return false;
+        $oProfile = BxDolProfile::getInstance($iMemberId);
+        if (!$oProfile) return false;
+        $oAccount = BxDolAccount::getInstance($oProfile->getAccountId());
+        if (!$oAccount) return false;
+        $aMembership = BxDolAcl::getInstance()->getMemberMembershipInfo($iMemberId);
+        return is_array($aMembership) && (int)$aMembership['id'] === $iAgentLevelId;
+    }
+
+    /**
+     * Returns true if the member is on the Landlord level.
+     */
+    private function _isLandlord($iMemberId)
+    {
+        $iLandlordLevelId = (int)getParam('sa_rentals_landlord_level_id');
+        if ($iLandlordLevelId === 0) return false;
+        return (int)BxDolAcl::getInstance()->getMemberMembershipInfo($iMemberId)['id'] === $iLandlordLevelId;
+    }
+
+    /**
+     * Check listing quota before allowing a new listing to be created.
+     * Estate Agents: sa_rentals_agent_quota (0 = unlimited)
+     * Landlords: sa_rentals_landlord_quota (0 = unlimited, but default is 3)
+     * Moderators/Admins: always allowed.
+     */
+    private function _checkListingQuota($iMemberId)
+    {
+        // Mods and admins are never quota-blocked
+        if ($this->_isAllowed('edit any entry'))
+            return true;
+
+        $iQuota = $this->_isEstateAgent($iMemberId)
+            ? (int)getParam('sa_rentals_agent_quota')
+            : (int)getParam('sa_rentals_landlord_quota');
+
+        // 0 = unlimited
+        if ($iQuota === 0) return true;
+
+        $iCount = $this->_oDb->getActiveListingCountByAuthor($iMemberId);
+        return $iCount < $iQuota;
+    }
+
+    /**
+     * Check photo quota before allowing additional uploads.
+     * Returns the max allowed photos for the member's level, or 0 if no limit applies.
+     */
+    private function _getPhotoQuota($iMemberId)
+    {
+        if ($this->_isAllowed('edit any entry'))
+            return 0; // unlimited for mods/admins
+        return $this->_isEstateAgent($iMemberId)
+            ? (int)getParam('sa_rentals_agent_photos')
+            : (int)getParam('sa_rentals_landlord_photos');
     }
 }

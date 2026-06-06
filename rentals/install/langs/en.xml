@@ -125,6 +125,36 @@
     <string name="_sa_rentals_opt_blacklisting"><![CDATA[Enable blacklisting]]></string>
     <string name="_sa_rentals_opt_show_banners"><![CDATA[Show education banners for disabled features]]></string>
     <string name="_sa_rentals_opt_moderation"><![CDATA[Require admin approval for new listings]]></string>
+    <!-- v3 settings — Category: Listings -->
+    <string name="_sa_rentals_opt_expiry_days"><![CDATA[Listing expiry (days, 0 = never)]]></string>
+    <string name="_sa_rentals_opt_expiry_reminder_days"><![CDATA[Remind owner before expiry (days)]]></string>
+    <string name="_sa_rentals_opt_verified_badge"><![CDATA[Show verified badge on listings]]></string>
+    <!-- v3 settings — Category: Quotas -->
+    <string name="_sa_rentals_opt_landlord_quota"><![CDATA[Max active listings — Landlord level (0 = unlimited)]]></string>
+    <string name="_sa_rentals_opt_agent_quota"><![CDATA[Max active listings — Estate Agent level (0 = unlimited)]]></string>
+    <string name="_sa_rentals_opt_landlord_photos"><![CDATA[Max photos per listing — Landlord]]></string>
+    <string name="_sa_rentals_opt_agent_photos"><![CDATA[Max photos per listing — Estate Agent]]></string>
+    <!-- v3 settings — Category: Enquiries -->
+    <string name="_sa_rentals_opt_enquiry_enabled"><![CDATA[Enable enquiry system]]></string>
+    <string name="_sa_rentals_opt_enquiry_throttle"><![CDATA[Max enquiries per tenant per day]]></string>
+    <!-- v3 settings — Category: Features -->
+    <string name="_sa_rentals_opt_whatsapp_enabled"><![CDATA[Show WhatsApp contact button]]></string>
+    <!-- v3 settings — Category: Paid Levels -->
+    <string name="_sa_rentals_opt_landlord_level_id"><![CDATA[Landlord member level ID (from sys_acl_levels)]]></string>
+    <string name="_sa_rentals_opt_agent_level_id"><![CDATA[Estate Agent member level ID (from sys_acl_levels)]]></string>
+    <!-- v3 ACL actions -->
+    <string name="_acl_txt_sa_rentals_verify_listing"><![CDATA[Mark rental listing as verified]]></string>
+    <string name="_acl_txt_sa_rentals_blacklist_member"><![CDATA[Blacklist a member from rentals]]></string>
+    <!-- v3 UI strings -->
+    <string name="_sa_rentals_badge_verified"><![CDATA[Verified]]></string>
+    <string name="_sa_rentals_btn_whatsapp"><![CDATA[Chat on WhatsApp]]></string>
+    <string name="_sa_rentals_btn_enquire"><![CDATA[Enquire]]></string>
+    <string name="_sa_rentals_msg_quota_reached"><![CDATA[You have reached your listing quota for your current subscription level.]]></string>
+    <string name="_sa_rentals_msg_photo_quota_reached"><![CDATA[Photo limit reached for your subscription level.]]></string>
+    <string name="_sa_rentals_msg_listing_expired"><![CDATA[This listing has expired.]]></string>
+    <string name="_sa_rentals_msg_upgrade_required"><![CDATA[A Landlord or Estate Agent subscription is required to post listings.]]></string>
+    <string name="_sa_rentals_expires_label"><![CDATA[Expires]]></string>
+    <string name="_sa_rentals_verified_by"><![CDATA[Verified listing]]></string>
     <!-- Moderation / pending -->
     <string name="_sa_rentals_status_pending"><![CDATA[Pending Approval]]></string>
     <string name="_sa_rentals_pending_submitted"><![CDATA[Your listing has been submitted and is awaiting approval. You will be notified once it goes live.]]></string>
@@ -145,4 +175,9 @@
     <string name="_sa_rentals_admin_col_featured"><![CDATA[Featured]]></string>
     <string name="_sa_rentals_admin_col_created"><![CDATA[Posted]]></string>
     <string name="_sa_rentals_admin_col_actions"><![CDATA[Actions]]></string>
+    <!-- v3 admin verify actions -->
+    <string name="_sa_rentals_admin_verify"><![CDATA[Verify]]></string>
+    <string name="_sa_rentals_admin_unverify"><![CDATA[Unverify]]></string>
+    <string name="_sa_rentals_admin_verified"><![CDATA[Listing marked as verified.]]></string>
+    <string name="_sa_rentals_admin_unverified"><![CDATA[Verified badge removed.]]></string>
 </resources>

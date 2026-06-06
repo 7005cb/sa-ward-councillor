@@ -165,9 +165,14 @@ VALUES
 
 -- ─── Privacy (Option B — native UNA "Visible to..." system) ─────────────────
 INSERT IGNORE INTO `sys_objects_privacy`
-  (`object`, `module`, `action`, `allow_view_to`, `allow_view_to_editable`, `allow_post_to`, `allow_post_to_editable`)
+  (`object`, `module`, `action`, `title`, `default_group`, `spaces`,
+   `table`, `table_field_id`, `table_field_author`,
+   `override_class_name`, `override_class_file`)
 VALUES
-  ('sa_rentals_view', 'sa_rentals', 'view', 2147483647, 1, 2147483647, 1);
+  ('sa_rentals_allow_view_to', 'sa_rentals', 'view',
+   '_sa_rentals_form_input_allow_view_to', '3', 'all',
+   'sa_rentals_listings', 'id', 'author_id', '', '');
+
 -- ────────────────────────────────────────────────────────────────────────────
 
 -- ─── Feature toggles (sys_options) ──────────────────────────────────────────
